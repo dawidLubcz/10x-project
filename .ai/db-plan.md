@@ -16,7 +16,7 @@
 - **front**: VARCHAR(200) NOT NULL CHECK (LENGTH(front) <= 200)  
 - **back**: VARCHAR(500) NOT NULL CHECK (LENGTH(back) <= 500)  
 - **source**: VARCHAR(50) NOT NULL CHECK (source IN ('ai-full', 'ai-edited', 'manual'))  
-- **generation_id**: BIGINT  
+- **generation_id**: BIGINT REFERENCES generations(id) ON DELETE SET NULL
   *Uwaga: Pole przechowuje identyfikator generacji, ale nie jest powiązane relacją FK.*  
 - **user_id**: UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE  
 - **created_at**: TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP  
