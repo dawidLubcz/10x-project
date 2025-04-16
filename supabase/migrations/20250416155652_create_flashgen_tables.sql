@@ -99,25 +99,21 @@ create policy "Authenticated users can view their own flashcards"
 on public.flashcards for select
 to authenticated
 using (auth.uid() = user_id);
-alter policy "Authenticated users can view their own flashcards" on public.flashcards disable;
 
 create policy "Authenticated users can insert their own flashcards"
 on public.flashcards for insert
 to authenticated
 with check (auth.uid() = user_id);
-alter policy "Authenticated users can insert their own flashcards" on public.flashcards disable;
 
 create policy "Authenticated users can update their own flashcards"
 on public.flashcards for update
 to authenticated
 using (auth.uid() = user_id);
-alter policy "Authenticated users can update their own flashcards" on public.flashcards disable;
 
 create policy "Authenticated users can delete their own flashcards"
 on public.flashcards for delete
 to authenticated
 using (auth.uid() = user_id);
-alter policy "Authenticated users can delete their own flashcards" on public.flashcards disable;
 
 -- create rls policies for generations but disabled
 -- authenticated users can only access their own generations
@@ -125,13 +121,11 @@ create policy "Authenticated users can view their own generations"
 on public.generations for select
 to authenticated
 using (auth.uid() = user_id);
-alter policy "Authenticated users can view their own generations" on public.generations disable;
 
 create policy "Authenticated users can insert their own generations"
 on public.generations for insert
 to authenticated
 with check (auth.uid() = user_id);
-alter policy "Authenticated users can insert their own generations" on public.generations disable;
 
 -- create rls policies for generation_error_logs but disabled
 -- authenticated users can only access their own error logs
@@ -139,29 +133,24 @@ create policy "Authenticated users can view their own error logs"
 on public.generation_error_logs for select
 to authenticated
 using (auth.uid() = user_id);
-alter policy "Authenticated users can view their own error logs" on public.generation_error_logs disable;
 
 create policy "Authenticated users can insert their own error logs"
 on public.generation_error_logs for insert
 to authenticated
 with check (auth.uid() = user_id);
-alter policy "Authenticated users can insert their own error logs" on public.generation_error_logs disable;
 
 -- anon users have no access to any tables (policies disabled)
 create policy "Anon users cannot access flashcards"
 on public.flashcards for select
 to anon
 using (false);
-alter policy "Anon users cannot access flashcards" on public.flashcards disable;
 
 create policy "Anon users cannot access generations"
 on public.generations for select
 to anon
 using (false);
-alter policy "Anon users cannot access generations" on public.generations disable;
 
 create policy "Anon users cannot access error logs"
 on public.generation_error_logs for select
 to anon
-using (false);
-alter policy "Anon users cannot access error logs" on public.generation_error_logs disable; 
+using (false); 
