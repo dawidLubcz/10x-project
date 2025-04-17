@@ -95,7 +95,7 @@ export interface FlashcardListResponseDto {
 
 /** Request DTO to initiate flashcard generation */
 export interface InitiateGenerationDto {
-  inputText: string; // max 100 characters
+  input_text: string; // max 100 characters
 }
 
 /** DTO for an AI-generated flashcard before saving */
@@ -107,7 +107,7 @@ export interface GeneratedFlashcardDto {
 
 /** Response DTO for flashcard generation */
 export interface GenerationResponseDto {
-  generationId: number;
+  generation_id: number;
   flashcards: GeneratedFlashcardDto[];
 }
 
