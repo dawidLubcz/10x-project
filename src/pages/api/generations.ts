@@ -4,7 +4,8 @@ import { initiateGenerationSchema } from "../../lib/schemas/generation.schema";
 import { ZodError } from "zod";
 
 // Predefined user ID for testing
-const TEST_USER_ID = "7eefde80-d362-40af-a6dd-d75e501cb1c7";
+//const TEST_USER_ID = "7eefde80-d362-40af-a6dd-d75e501cb1c7";
+const TEST_USER_ID = "a5a661c1-13ed-4116-8a65-9fe8dd3f0341";
 
 /**
  * API route for initiating flashcard generation
