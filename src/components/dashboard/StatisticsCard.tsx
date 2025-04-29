@@ -14,7 +14,7 @@ const StatisticItem: React.FC<{
     {loading ? (
       <Skeleton className="h-8 w-16" />
     ) : (
-      <p className="text-2xl font-bold">{value}</p>
+      <p className="text-2xl font-bold text-foreground">{value}</p>
     )}
   </div>
 );
@@ -23,11 +23,11 @@ const StatisticsCard: React.FC = () => {
   const { statistics, loading, error } = useFlashcardStatistics();
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-xl">Twoje statystyki</CardTitle>
+    <Card className="bg-card border-zinc-200 dark:border-zinc-800">
+      <CardHeader className="bg-card">
+        <CardTitle className="text-xl text-card-foreground">Twoje statystyki</CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="bg-card">
         {error ? (
           <div className="flex items-center space-x-2 text-destructive p-4 rounded-md bg-destructive/10">
             <AlertCircle className="h-5 w-5" />

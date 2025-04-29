@@ -11,27 +11,34 @@ const title = "Dashboard - 10xProject";
 ---
 
 <Layout title={title}>
-	<div class="min-h-screen flex flex-col">
-		<header class="border-b py-4 bg-white">
+	<div class="min-h-screen flex flex-col bg-background">
+		<header class="border-b border-zinc-200 dark:border-zinc-800 py-4 bg-zinc-50 dark:bg-zinc-900">
 			<div class="container mx-auto px-4 flex justify-between items-center">
 				<a href="/" class="text-2xl font-bold text-primary">10xProject</a>
-				<nav>
-					<ul class="flex space-x-4">
-						<li><a href="/" class="hover:text-primary">Dashboard</a></li>
-						<li><a href="/flashcards" class="hover:text-primary">Fiszki</a></li>
-						<li><a href="/generate" class="hover:text-primary">Generator AI</a></li>
-						<li><a href="/learn" class="hover:text-primary">Nauka</a></li>
-					</ul>
-				</nav>
+				<div class="flex items-center">
+					<nav class="mr-4">
+						<ul class="flex space-x-4">
+							<li><a href="/" class="text-zinc-900 dark:text-zinc-100 hover:text-primary transition-colors">Dashboard</a></li>
+							<li><a href="/flashcards" class="text-zinc-900 dark:text-zinc-100 hover:text-primary transition-colors">Fiszki</a></li>
+							<li><a href="/generate" class="text-zinc-900 dark:text-zinc-100 hover:text-primary transition-colors">Generator AI</a></li>
+							<li><a href="/learn" class="text-zinc-900 dark:text-zinc-100 hover:text-primary transition-colors">Nauka</a></li>
+						</ul>
+					</nav>
+					<button id="theme-toggle" class="p-2 rounded-full bg-zinc-200 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 hover:bg-zinc-300 dark:hover:bg-zinc-700 transition-colors">
+						<span class="theme-toggle-icon inline-block w-5 h-5"></span>
+					</button>
+				</div>
 			</div>
 		</header>
 
-		<main class="flex-grow">
+		<main class="flex-grow bg-zinc-100 dark:bg-zinc-950">
 			<div class="container mx-auto px-4 py-8 space-y-8">
+				<h1 class="text-3xl font-bold mb-8 text-center text-zinc-900 dark:text-zinc-50">Dashboard</h1>
+				
 				<StatisticsCard client:load />
 				
 				<section>
-					<h2 class="text-2xl font-bold mb-4">Szybki dostęp</h2>
+					<h2 class="text-2xl font-bold mb-4 text-zinc-900 dark:text-zinc-50">Szybki dostęp</h2>
 					<ActionCardGrid 
 						client:load
 						actions={[
@@ -68,16 +75,29 @@ const title = "Dashboard - 10xProject";
 				</section>
 				
 				<section>
-					<h2 class="text-2xl font-bold mb-4">Szybkie tworzenie fiszki</h2>
+					<h2 class="text-2xl font-bold mb-4 text-zinc-900 dark:text-zinc-50">Szybkie tworzenie fiszki</h2>
 					<QuickCreateForm client:load />
 				</section>
 			</div>
 		</main>
 
-		<footer class="border-t py-4 bg-gray-50">
-			<div class="container mx-auto px-4 text-center text-sm text-gray-600">
+		<footer class="border-t border-zinc-200 dark:border-zinc-800 py-4 bg-zinc-50 dark:bg-zinc-900">
+			<div class="container mx-auto px-4 text-center text-sm text-zinc-600 dark:text-zinc-400">
 				&copy; 2023-2024 10xProject. Wszystkie prawa zastrzeżone.
 			</div>
 		</footer>
 	</div>
 </Layout>
+
+<script>
+	// Inicjalizacja przycisku po załadowaniu strony
+	document.addEventListener('DOMContentLoaded', () => {
+		const themeToggleButton = document.getElementById('theme-toggle');
+		// Używamy as any, aby TypeScript nie zgłaszał błędu
+		const toggleFn = (window as any).toggleTheme;
+		
+		if (themeToggleButton && typeof toggleFn === 'function') {
+			themeToggleButton.addEventListener('click', toggleFn);
+		}
+	});
+</script>
