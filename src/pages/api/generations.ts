@@ -1,60 +1,85 @@
-import type { APIRoute } from "astro";
-import { AIGenerationService } from "../../lib/services/ai-generation.service";
-import { initiateGenerationSchema } from "../../lib/schemas/generation.schema";
-import { ZodError } from "zod";
+import type { APIRoute } from 'astro';
+import { z } from 'zod';
+import { FlashcardSource } from '../../types';
+
+// Disable prerendering for dynamic response
+export const prerender = false;
 
 // Predefined user ID for testing
 //const TEST_USER_ID = "7eefde80-d362-40af-a6dd-d75e501cb1c7";
 const TEST_USER_ID = "a5a661c1-13ed-4116-8a65-9fe8dd3f0341";
 
-/**
- * API route for initiating flashcard generation
- * POST /api/generations
- */
-export const POST: APIRoute = async ({ request, locals }) => {
-  // Get the supabase client from locals
-  const supabase = locals.supabase;
+// Schema validation for input
+const GenerationSchema = z.object({
+  input_text: z.string().min(1).max(100)
+});
+
+// Mock function to generate flashcards with an AI (to be replaced with actual implementation)
+const generateFlashcardsWithAI = async (text: string, userId: string) => {
+  // Simulate processing time
+  await new Promise(resolve => setTimeout(resolve, 1500));
   
+  // Generate 3-6 flashcards based on the input text
+  const numFlashcards = Math.floor(Math.random() * 4) + 3;
+  const flashcards = Array(numFlashcards).fill(null).map((_, i) => ({
+    front: `Pytanie ${i + 1} dotyczące: ${text.slice(0, 30)}${text.length > 30 ? '...' : ''}?`,
+    back: `Odpowiedź ${i + 1} na pytanie dotyczące: ${text.slice(0, 30)}${text.length > 30 ? '...' : ''}.`,
+    source: FlashcardSource.AI_FULL
+  }));
+  
+  return {
+    generation_id: Date.now(),
+    user_id: userId,
+    flashcards
+  };
+};
+
+export const POST: APIRoute = async ({ request }) => {
   try {
-    // Parse request body
-    const requestBody = await request.json();
+    // Parse the request body
+    const body = await request.json();
     
-    // Validate request data using zod schema
-    const validatedData = initiateGenerationSchema.parse(requestBody);
-    
-    // Create AI generation service
-    const generationService = new AIGenerationService(supabase);
-    
-    // Generate flashcards using predefined user ID
-    const result = await generationService.generateFlashcards(
-      validatedData.input_text,
-      TEST_USER_ID
-    );
-    
-    // Return success response
-    return new Response(
-      JSON.stringify(result),
-      { status: 201, headers: { "Content-Type": "application/json" } }
-    );
-    
-  } catch (error) {
-    console.error("Error generating flashcards:", error);
-    
-    // Handle validation errors
-    if (error instanceof ZodError) {
+    // Validate the request body
+    const validationResult = GenerationSchema.safeParse(body);
+    if (!validationResult.success) {
       return new Response(
-        JSON.stringify({ 
-          message: "Validation error", 
-          errors: error.errors 
+        JSON.stringify({
+          error: "Invalid input",
+          details: validationResult.error.format()
         }),
-        { status: 400, headers: { "Content-Type": "application/json" } }
+        {
+          status: 400,
+          headers: { 'Content-Type': 'application/json' }
+        }
       );
     }
     
-    // Handle other errors
+    // Extract validated data
+    const { input_text } = validationResult.data;
+    
+    // Generate flashcards using predefined user ID
+    const generatedData = await generateFlashcardsWithAI(input_text, TEST_USER_ID);
+    
+    // Return response
     return new Response(
-      JSON.stringify({ message: "Failed to generate flashcards" }),
-      { status: 500, headers: { "Content-Type": "application/json" } }
+      JSON.stringify(generatedData),
+      {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' }
+      }
+    );
+  } catch (error) {
+    console.error('Error generating flashcards:', error);
+    
+    return new Response(
+      JSON.stringify({
+        error: "Failed to generate flashcards",
+        message: error instanceof Error ? error.message : "Unknown error"
+      }),
+      {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' }
+      }
     );
   }
 }; 
