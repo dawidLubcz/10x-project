@@ -104,13 +104,27 @@ export const useFlashcards = (): FlashcardsState & FlashcardsActions => {
    * Rozwijanie/zwijanie fiszki
    */
   const handleToggleExpand = useCallback((id: number) => {
-    setFlashcards(prevFlashcards => 
-      prevFlashcards.map(flashcard => 
-        flashcard.id === id 
-          ? { ...flashcard, isExpanded: !flashcard.isExpanded } 
-          : flashcard
-      )
-    );
+    console.log('Toggle expand for flashcard ID:', id);
+    
+    setFlashcards(prevFlashcards => {
+      const updatedFlashcards = prevFlashcards.map(flashcard => {
+        if (flashcard.id === id) {
+          const updated = { 
+            ...flashcard, 
+            isExpanded: !flashcard.isExpanded 
+          };
+          console.log('Flashcard state changed:', { 
+            id, 
+            wasExpanded: flashcard.isExpanded, 
+            isNowExpanded: updated.isExpanded 
+          });
+          return updated;
+        }
+        return flashcard;
+      });
+      
+      return updatedFlashcards;
+    });
   }, []);
 
   /**

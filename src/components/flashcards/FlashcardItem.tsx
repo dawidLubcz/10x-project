@@ -24,45 +24,77 @@ export const FlashcardItem: React.FC<FlashcardItemProps> = ({
   onDelete,
   onToggleExpand,
 }) => {
+  // Sprawdzamy czy tekst jest dłuższy niż maksymalna długość
+  const isFrontTruncated = flashcard.front && flashcard.front.length > 50;
+  const isBackTruncated = flashcard.back && flashcard.back.length > 150;
+  const shouldShowExpandButton = isFrontTruncated || isBackTruncated;
+
   // Funkcja zwracająca skróconą treść, jeśli fiszka nie jest rozwinięta
   const truncateText = (text: string, maxLength: number = 100) => {
-    if (!text || text.length <= maxLength || flashcard.isExpanded) {
+    // Jeśli tekst jest pusty lub fiszka jest rozwinięta, zwróć pełny tekst
+    if (!text) return '';
+    
+    // W trybie rozwiniętym zwracamy cały tekst
+    if (flashcard.isExpanded) {
       return text;
     }
+    
+    // W trybie zwiniętym, sprawdzamy czy trzeba skrócić
+    if (text.length <= maxLength) {
+      return text;
+    }
+    
+    // Zwróć skróconą wersję
     return `${text.substring(0, maxLength)}...`;
   };
+
+  console.log('Flashcard state:', { 
+    id: flashcard.id, 
+    isExpanded: flashcard.isExpanded,
+    frontLength: flashcard.front?.length,
+    backLength: flashcard.back?.length
+  });
 
   return (
     <Card className="h-full flex flex-col overflow-hidden">
       <CardHeader className="pb-3">
-        <CardTitle className="text-lg font-semibold">{truncateText(flashcard.front, 50)}</CardTitle>
+        <CardTitle className="text-lg font-semibold">
+          {truncateText(flashcard.front, 50)}
+        </CardTitle>
       </CardHeader>
       
-      <CardContent className="pb-2 flex-grow">
+      <CardContent className={`pb-2 flex-grow transition-all duration-200 ${flashcard.isExpanded ? 'max-h-[500px]' : 'max-h-[150px]'} overflow-auto`}>
         <div className="prose prose-sm max-w-none">
           <p>{truncateText(flashcard.back, 150)}</p>
         </div>
       </CardContent>
       
       <CardFooter className="border-t pt-3 flex justify-between items-center">
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          onClick={onToggleExpand}
-          className="text-xs"
-        >
-          {flashcard.isExpanded ? (
-            <>
-              <ChevronUp className="h-4 w-4 mr-1" />
-              Zwiń
-            </>
-          ) : (
-            <>
-              <ChevronDown className="h-4 w-4 mr-1" />
-              Rozwiń
-            </>
-          )}
-        </Button>
+        {shouldShowExpandButton ? (
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={() => {
+              console.log('Toggle expand button clicked for flashcard ID:', flashcard.id);
+              onToggleExpand();
+            }}
+            className="text-xs"
+          >
+            {flashcard.isExpanded ? (
+              <>
+                <ChevronUp className="h-4 w-4 mr-1" />
+                Zwiń
+              </>
+            ) : (
+              <>
+                <ChevronDown className="h-4 w-4 mr-1" />
+                Rozwiń ({isFrontTruncated || isBackTruncated ? 'pokaż więcej' : ''})
+              </>
+            )}
+          </Button>
+        ) : (
+          <div></div> // Pusty element, by zachować układ
+        )}
         
         <div className="flex gap-2">
           <Button 
