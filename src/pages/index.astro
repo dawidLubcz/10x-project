@@ -1,11 +1,83 @@
 ---
-import Welcome from '../components/Welcome.astro';
-import Layout from '../layouts/Layout.astro';
+import Layout from "../layouts/Layout.astro";
+import StatisticsCard from "../components/dashboard/StatisticsCard";
+import ActionCardGrid from "../components/dashboard/ActionCardGrid";
+import QuickCreateForm from "../components/dashboard/QuickCreateForm";
 
 // Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
 // Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+
+const title = "Dashboard - 10xProject";
 ---
 
-<Layout>
-	<Welcome />
+<Layout title={title}>
+	<div class="min-h-screen flex flex-col">
+		<header class="border-b py-4 bg-white">
+			<div class="container mx-auto px-4 flex justify-between items-center">
+				<a href="/" class="text-2xl font-bold text-primary">10xProject</a>
+				<nav>
+					<ul class="flex space-x-4">
+						<li><a href="/" class="hover:text-primary">Dashboard</a></li>
+						<li><a href="/flashcards" class="hover:text-primary">Fiszki</a></li>
+						<li><a href="/generate" class="hover:text-primary">Generator AI</a></li>
+						<li><a href="/learn" class="hover:text-primary">Nauka</a></li>
+					</ul>
+				</nav>
+			</div>
+		</header>
+
+		<main class="flex-grow">
+			<div class="container mx-auto px-4 py-8 space-y-8">
+				<StatisticsCard client:load />
+				
+				<section>
+					<h2 class="text-2xl font-bold mb-4">Szybki dostęp</h2>
+					<ActionCardGrid 
+						client:load
+						actions={[
+							{
+								title: "Generuj z AI",
+								description: "Utwórz fiszki automatycznie za pomocą sztucznej inteligencji",
+								icon: "A",
+								linkTo: "/generate",
+								variant: "primary"
+							},
+							{
+								title: "Utwórz manualnie",
+								description: "Dodaj własne fiszki ręcznie",
+								icon: "U",
+								linkTo: "/create",
+								variant: "default"
+							},
+							{
+								title: "Przeglądaj fiszki",
+								description: "Przeglądaj i zarządzaj swoimi fiszkami",
+								icon: "P",
+								linkTo: "/flashcards",
+								variant: "default"
+							},
+							{
+								title: "Rozpocznij naukę",
+								description: "Zacznij sesję nauki z wykorzystaniem fiszek",
+								icon: "N",
+								linkTo: "/learn",
+								variant: "secondary"
+							}
+						]}
+					/>
+				</section>
+				
+				<section>
+					<h2 class="text-2xl font-bold mb-4">Szybkie tworzenie fiszki</h2>
+					<QuickCreateForm client:load />
+				</section>
+			</div>
+		</main>
+
+		<footer class="border-t py-4 bg-gray-50">
+			<div class="container mx-auto px-4 text-center text-sm text-gray-600">
+				&copy; 2023-2024 10xProject. Wszystkie prawa zastrzeżone.
+			</div>
+		</footer>
+	</div>
 </Layout>

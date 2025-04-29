@@ -1,5 +1,5 @@
 /**
- * DTO and Command Models for 10xCards API
+ * DTO and Command Models for 10xProject API
  */
 
 import type { Database } from "./db/database.types";

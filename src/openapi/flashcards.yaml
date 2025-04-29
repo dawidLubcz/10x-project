@@ -1,18 +1,18 @@
 openapi: 3.0.3
 info:
-  title: 10xCards API - Flashcards
+  title: 10xProject API - Flashcards
   description: |
-    API do zarządzania fiszkami w aplikacji 10xCards.
+    API do zarządzania fiszkami w aplikacji 10xProject.
     Pozwala na tworzenie i pobieranie fiszek z opcjami filtrowania, sortowania i paginacji.
   version: 1.0.0
   contact:
-    name: 10xCards Team
-    email: contact@10xcards.com
+    name: 10xProject Team
+    email: contact@10xproject.com
 
 servers:
-  - url: https://api.10xcards.com
+  - url: https://api.10xproject.com
     description: Produkcyjny serwer API
-  - url: https://staging.10xcards.com
+  - url: https://staging.10xproject.com
     description: Staging serwer API
   - url: http://localhost:4321
     description: Lokalny serwer deweloperski
