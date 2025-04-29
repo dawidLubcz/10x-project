@@ -22,22 +22,31 @@ export const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = (
 }) => {
   const [isDeleting, setIsDeleting] = useState(false);
 
+  // Handle cancel
+  const handleCancel = () => {
+    if (!isDeleting) {
+      onClose();
+    }
+  };
+
   // Obsługa potwierdzenia usunięcia
   const handleConfirm = async () => {
+    if (!flashcardId) return;
+    
     try {
       setIsDeleting(true);
       await onConfirm();
-      // Modal zamknie się automatycznie po usunięciu
     } catch (error) {
       console.error('Błąd podczas usuwania fiszki:', error);
-      // Tutaj można dodać obsługę błędu, np. wyświetlenie komunikatu
+      // Ensure we close the modal even if there's an error
+      onClose();
     } finally {
       setIsDeleting(false);
     }
   };
 
   return (
-    <AlertDialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+    <AlertDialog open={isOpen} onOpenChange={(open) => !open && handleCancel()}>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>Czy na pewno chcesz usunąć tę fiszkę?</AlertDialogTitle>
@@ -46,7 +55,12 @@ export const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = (
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={isDeleting}>Anuluj</AlertDialogCancel>
+          <AlertDialogCancel 
+            onClick={handleCancel}
+            disabled={isDeleting}
+          >
+            Anuluj
+          </AlertDialogCancel>
           <AlertDialogAction 
             onClick={handleConfirm}
             disabled={isDeleting}

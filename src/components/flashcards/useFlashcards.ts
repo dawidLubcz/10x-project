@@ -185,15 +185,15 @@ export const useFlashcards = (): FlashcardsState & FlashcardsActions => {
       // Odświeżenie listy fiszek
       await fetchFlashcards();
       
-      // Zamknięcie modalu
-      setDeletingFlashcardId(null);
-      
       // Powiadomienie o sukcesie
       toast.success('Fiszka została usunięta');
     } catch (error) {
       // Powiadomienie o błędzie
+      console.error('Error deleting flashcard:', error);
       toast.error(error instanceof Error ? error.message : 'Wystąpił nieznany błąd');
-      throw error;
+    } finally {
+      // Zamknięcie modalu - ZAWSZE zamykamy modal, nawet jeśli wystąpił błąd
+      setDeletingFlashcardId(null);
     }
   }, [deletingFlashcardId, fetchFlashcards]);
 
