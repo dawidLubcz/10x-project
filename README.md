@@ -1,4 +1,4 @@
-# FlashGen AI
+# 10xProject
 
 ![Version](https://img.shields.io/badge/version-0.0.1-blue)
 
@@ -13,7 +13,7 @@
 
 ## Overview
 
-FlashGen AI is a web application that enables users to quickly create high-quality educational flashcards using artificial intelligence. The application solves the time-consuming problem of manually creating flashcards, which often discourages users from using the effective spaced repetition learning method.
+10xProject is a web application that enables users to quickly create high-quality educational flashcards using artificial intelligence. The application solves the time-consuming problem of manually creating flashcards, which often discourages users from using the effective spaced repetition learning method.
 
 ### Key Features
 - AI-powered flashcard generation based on input text
