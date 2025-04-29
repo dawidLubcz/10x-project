@@ -1,0 +1,11 @@
+---
+import MainLayout from "../layouts/MainLayout.astro";
+import { FlashcardList } from "../components/flashcards/FlashcardList";
+---
+
+<MainLayout title="Twoje fiszki | FlashGen AI">
+  <div class="container mx-auto py-8">
+    <h1 class="text-3xl font-bold mb-6">Twoje fiszki</h1>
+    <FlashcardList client:load />
+  </div>
+</MainLayout> 

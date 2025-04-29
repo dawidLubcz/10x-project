@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import * as DialogPrimitive from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
@@ -61,11 +61,11 @@ export const EditFlashcardModal = ({
   const isOverLimit = charsRemaining < 0;
 
   return (
-    <Dialog open={isOpen} onOpenChange={(open: boolean) => !open && onClose()}>
-      <DialogContent className="sm:max-w-[600px]">
-        <DialogHeader>
-          <DialogTitle>Edytuj fiszkę</DialogTitle>
-        </DialogHeader>
+    <DialogPrimitive.Dialog open={isOpen} onOpenChange={(open: boolean) => !open && onClose()}>
+      <DialogPrimitive.DialogContent className="sm:max-w-[600px]">
+        <DialogPrimitive.DialogHeader>
+          <DialogPrimitive.DialogTitle>Edytuj fiszkę</DialogPrimitive.DialogTitle>
+        </DialogPrimitive.DialogHeader>
         
         <div className="space-y-6 py-4">
           <div className="space-y-2">
@@ -101,7 +101,7 @@ export const EditFlashcardModal = ({
           )}
         </div>
         
-        <DialogFooter>
+        <DialogPrimitive.DialogFooter>
           <Button
             variant="outline"
             onClick={onClose}
@@ -122,8 +122,8 @@ export const EditFlashcardModal = ({
               'Zapisz'
             )}
           </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        </DialogPrimitive.DialogFooter>
+      </DialogPrimitive.DialogContent>
+    </DialogPrimitive.Dialog>
   );
 }; 
