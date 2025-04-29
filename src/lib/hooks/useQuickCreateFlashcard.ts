@@ -34,6 +34,7 @@ export const useQuickCreateFlashcard = (): UseQuickCreateFlashcardResult => {
       
       const flashcard: FlashcardDto = await response.json();
       setSuccess(true);
+      
       return flashcard;
     } catch (err) {
       setError(err instanceof Error ? err : new Error('Nieznany błąd'));

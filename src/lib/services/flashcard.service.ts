@@ -61,7 +61,7 @@ export class FlashcardService {
     // Budowanie zapytania
     let query = this.supabase
       .from("flashcards")
-      .select("id, front, back, user_id, created_at, updated_at")
+      .select("id, front, back, user_id, created_at, updated_at, source")
       .eq("user_id", userId);
 
     // Dodawanie filtrowania po źródle, jeśli podano
@@ -116,7 +116,7 @@ export class FlashcardService {
   async getFlashcardById(id: number, userId: string): Promise<FlashcardDto | null> {
     const { data, error } = await this.supabase
       .from('flashcards')
-      .select('id, front, back, user_id, created_at, updated_at')
+      .select('id, front, back, user_id, created_at, updated_at, source')
       .eq('id', id)
       .eq('user_id', userId)
       .single();

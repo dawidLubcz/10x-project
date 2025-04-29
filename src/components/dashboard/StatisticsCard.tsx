@@ -1,8 +1,9 @@
 import React from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "../ui/card";
 import { Skeleton } from "../ui/skeleton";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, RefreshCw } from "lucide-react";
 import { useFlashcardStatistics } from "../../lib/hooks/useFlashcardStatistics";
+import { Button } from "../ui/button";
 
 const StatisticItem: React.FC<{
   label: string;
@@ -20,12 +21,22 @@ const StatisticItem: React.FC<{
 );
 
 const StatisticsCard: React.FC = () => {
-  const { statistics, loading, error } = useFlashcardStatistics();
+  const { statistics, loading, error, refreshStatistics } = useFlashcardStatistics();
 
   return (
     <Card className="bg-card border-zinc-200 dark:border-zinc-800">
-      <CardHeader className="bg-card">
+      <CardHeader className="bg-card flex flex-row items-center justify-between">
         <CardTitle className="text-xl text-card-foreground">Twoje statystyki</CardTitle>
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={refreshStatistics}
+          disabled={loading}
+          className="h-8 px-2 flex items-center gap-1"
+        >
+          <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+          <span>Odśwież</span>
+        </Button>
       </CardHeader>
       <CardContent className="bg-card">
         {error ? (
@@ -33,7 +44,7 @@ const StatisticsCard: React.FC = () => {
             <AlertCircle className="h-5 w-5" />
             <p>Wystąpił błąd podczas pobierania statystyk</p>
             <button 
-              onClick={() => window.location.reload()}
+              onClick={refreshStatistics}
               className="text-sm underline ml-2"
             >
               Odśwież

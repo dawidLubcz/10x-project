@@ -34,6 +34,7 @@ export interface UseFlashcardStatisticsResult {
   statistics: FlashcardStatistics | null;
   loading: boolean;
   error: Error | null;
+  refreshStatistics: () => void;
 }
 
 // Hook useQuickCreateFlashcard response
