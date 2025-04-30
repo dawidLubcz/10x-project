@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import type { InputFormData } from '../types/generateView';
@@ -16,7 +16,7 @@ export const InputForm = ({
   onSubmit,
   isGenerating
 }: InputFormProps) => {
-  const MAX_LENGTH = 100;
+  const MAX_LENGTH = 10000;
   const [isValid, setIsValid] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -34,13 +34,13 @@ export const InputForm = ({
     }
   }, [inputText]);
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = useCallback((e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     
     if (isValid && !isGenerating) {
       onSubmit({ inputText });
     }
-  };
+  }, [isValid, isGenerating, inputText, onSubmit]);
 
   const charsRemaining = MAX_LENGTH - inputText.length;
   const isOverLimit = charsRemaining < 0;
@@ -61,8 +61,8 @@ export const InputForm = ({
             id="inputText"
             value={inputText}
             onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setInputText(e.target.value)}
-            placeholder="Wprowadź tekst do wygenerowania fiszek (maks. 100 znaków)"
-            className={`min-h-24 w-full rounded-md border ${isOverLimit ? 'border-red-500' : 'border-gray-300 focus:border-blue-500 dark:border-gray-600'} p-3 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all`}
+            placeholder="Wprowadź tekst do wygenerowania fiszek (maks. 10000 znaków)"
+            className={`min-h-36 w-full rounded-md border ${isOverLimit ? 'border-red-500' : 'border-gray-300 focus:border-blue-500 dark:border-gray-600'} p-3 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all`}
             disabled={isGenerating}
           />
           

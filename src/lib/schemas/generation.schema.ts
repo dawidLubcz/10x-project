@@ -10,7 +10,7 @@ import {
 export const initiateGenerationSchema = z.object({
   input_text: z.string()
     .trim()
-    .min(1, "Input text must be at least 1000 characters")
+    .min(1, "Input text cannot be empty")
     .max(10000, "Input text must be 10000 characters or less")
 });
 

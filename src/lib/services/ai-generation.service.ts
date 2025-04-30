@@ -7,12 +7,76 @@ import type {
 } from "../../types";
 import { FlashcardSource } from "../../types";
 import type { Database } from "../../db/database.types";
+import { OpenRouterService, type ResponseFormat } from '../openrouter.service';
+
+const FLASHCARDS_RESPONSE_FORMAT: ResponseFormat = {
+  type: 'json_schema',
+  json_schema: {
+    name: 'flashcards',
+    strict: true,
+    schema: {
+      type: 'object',
+      properties: {
+        flashcards: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              front: { type: 'string' },
+              back: { type: 'string' }
+            },
+            required: ['front', 'back']
+          },
+          minItems: 1
+        }
+      },
+      required: ['flashcards']
+    }
+  }
+};
+
+const SYSTEM_PROMPT = `You are an expert at creating educational flashcards. Your task is to analyze the provided text and create a set of high-quality flashcards that will help users learn the material effectively.
+
+Guidelines for creating flashcards:
+1. Each flashcard should focus on a single concept, fact, or relationship
+2. Front side should pose a clear question or present a key term
+3. Back side should provide a concise but complete answer or explanation
+4. Avoid creating cards that are too complex or contain multiple concepts
+5. Use clear, simple language
+6. Create between 5-10 flashcards depending on the content
+
+IMPORTANT: You must respond with a valid JSON object containing an array of flashcards. Each flashcard must have 'front' and 'back' properties. Example format:
+
+{
+  "flashcards": [
+    {
+      "front": "What is the capital of France?",
+      "back": "Paris"
+    }
+  ]
+}
+
+DO NOT include any additional text or explanation in your response, ONLY the JSON object.`;
 
 /**
  * Service for handling AI-powered flashcard generation
  */
 export class AIGenerationService {
-  constructor(private supabaseClient: SupabaseClient<Database>) {}
+  private openRouter: OpenRouterService;
+
+  constructor(
+    private supabaseClient: SupabaseClient<Database>,
+    openRouterApiKey: string
+  ) {
+    this.openRouter = new OpenRouterService({ 
+      apiKey: openRouterApiKey,
+      defaultParams: {
+        temperature: 0.7,
+        max_tokens: 2000,
+        response_format: { type: "json_object" }
+      }
+    });
+  }
 
   /**
    * Generates flashcards from input text using AI
@@ -35,19 +99,18 @@ export class AIGenerationService {
       const generatedFlashcards = await this.callAIForFlashcards(inputText);
       console.log("Generated flashcards count:", generatedFlashcards.length);
       
-      // For testing purposes, return mock data without database operations
-      console.log("Returning mock data for testing purposes");
+      // TODO: Add database operations for production
       
-      // Return mock generation ID and generated flashcards
       return {
-        generation_id: 999, // Mock ID for testing
+        generation_id: Date.now(), // Temporary ID until DB integration
         flashcards: generatedFlashcards
       };
     } catch (error) {
-      // Log error
       console.error("Error in generateFlashcards:", error);
-      // Skip logging to database
-      throw error;
+      if (error instanceof Error) {
+        throw new Error(`Failed to generate flashcards: ${error.message}`);
+      }
+      throw new Error('Failed to generate flashcards: Unknown error');
     }
   }
 
@@ -58,25 +121,33 @@ export class AIGenerationService {
    */
   private async callAIForFlashcards(inputText: string): Promise<GeneratedFlashcardDto[]> {
     try {
-      // TODO: Implement actual call to OpenRouter.ai or other AI service
-      console.log("Calling AI service with input text:", inputText);
+      console.log('Calling OpenRouter with input:', inputText);
       
-      // For now, return mock data
-      return [
+      const response = await this.openRouter.sendChat(
+        [
+          { role: 'system', content: SYSTEM_PROMPT },
+          { role: 'user', content: inputText }
+        ],
         {
-          front: "Example front side 1",
-          back: "Example back side 1",
-          source: FlashcardSource.AI_FULL
-        },
-        {
-          front: "Example front side 2",
-          back: "Example back side 2",
-          source: FlashcardSource.AI_FULL
+          responseFormat: FLASHCARDS_RESPONSE_FORMAT
         }
-      ];
+      );
+
+      console.log('OpenRouter response:', JSON.stringify(response, null, 2));
+
+      if (!response.structured?.flashcards || !Array.isArray(response.structured.flashcards)) {
+        throw new Error('Invalid response format from AI');
+      }
+
+      // Transform the structured response into our DTO format
+      return response.structured.flashcards.map((card: { front: string; back: string }) => ({
+        front: card.front,
+        back: card.back,
+        source: FlashcardSource.AI_FULL
+      }));
     } catch (error) {
       console.error("Error calling AI service:", error);
-      throw new Error("Failed to generate flashcards with AI");
+      throw error;
     }
   }
 

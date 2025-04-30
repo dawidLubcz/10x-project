@@ -1,41 +1,32 @@
 import type { APIRoute } from 'astro';
 import { z } from 'zod';
-import { FlashcardSource } from '../../types';
+import { AIGenerationService } from '../../lib/services/ai-generation.service';
+import type { Database } from '../../db/database.types';
 
 // Disable prerendering for dynamic response
 export const prerender = false;
 
 // Predefined user ID for testing
-//const TEST_USER_ID = "7eefde80-d362-40af-a6dd-d75e501cb1c7";
 const TEST_USER_ID = "a5a661c1-13ed-4116-8a65-9fe8dd3f0341";
 
 // Schema validation for input
 const GenerationSchema = z.object({
-  input_text: z.string().min(1).max(100)
+  input_text: z.string()
+    .min(1, "Input text cannot be empty")
+    .max(10000, "Input text must be 10000 characters or less")
 });
 
-// Mock function to generate flashcards with an AI (to be replaced with actual implementation)
-const generateFlashcardsWithAI = async (text: string, userId: string) => {
-  // Simulate processing time
-  await new Promise(resolve => setTimeout(resolve, 1500));
-  
-  // Generate 3-6 flashcards based on the input text
-  const numFlashcards = Math.floor(Math.random() * 4) + 3;
-  const flashcards = Array(numFlashcards).fill(null).map((_, i) => ({
-    front: `Pytanie ${i + 1} dotyczące: ${text.slice(0, 30)}${text.length > 30 ? '...' : ''}?`,
-    back: `Odpowiedź ${i + 1} na pytanie dotyczące: ${text.slice(0, 30)}${text.length > 30 ? '...' : ''}.`,
-    source: FlashcardSource.AI_FULL
-  }));
-  
-  return {
-    generation_id: Date.now(),
-    user_id: userId,
-    flashcards
-  };
-};
-
-export const POST: APIRoute = async ({ request }) => {
+export const POST: APIRoute = async ({ request, locals }) => {
   try {
+    // Get Supabase client from context
+    const supabase = locals.supabase;
+
+    // Initialize AI Generation Service
+    const aiService = new AIGenerationService(
+      supabase,
+      import.meta.env.OPENROUTER_API_KEY
+    );
+
     // Parse the request body
     const body = await request.json();
     
@@ -57,8 +48,8 @@ export const POST: APIRoute = async ({ request }) => {
     // Extract validated data
     const { input_text } = validationResult.data;
     
-    // Generate flashcards using predefined user ID
-    const generatedData = await generateFlashcardsWithAI(input_text, TEST_USER_ID);
+    // Generate flashcards using AI service
+    const generatedData = await aiService.generateFlashcards(input_text, TEST_USER_ID);
     
     // Return response
     return new Response(
