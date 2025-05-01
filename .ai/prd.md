@@ -1,8 +1,8 @@
-# Dokument wymagań produktu (PRD) - FlashGen AI
+# Dokument wymagań produktu (PRD) - 10xProject
 
 ## 1. Przegląd produktu
 
-FlashGen AI to aplikacja webowa umożliwiająca użytkownikom szybkie tworzenie wysokiej jakości fiszek edukacyjnych przy pomocy sztucznej inteligencji. Aplikacja rozwiązuje problem czasochłonności manualnego tworzenia fiszek, co często zniechęca do korzystania z efektywnej metody nauki jaką jest spaced repetition.
+10xProject to aplikacja webowa umożliwiająca użytkownikom szybkie tworzenie wysokiej jakości fiszek edukacyjnych przy pomocy sztucznej inteligencji. Aplikacja rozwiązuje problem czasochłonności manualnego tworzenia fiszek, co często zniechęca do korzystania z efektywnej metody nauki jaką jest spaced repetition.
 
 Główne funkcje produktu:
 - Generowanie fiszek przez AI na podstawie wprowadzonego tekstu
@@ -24,7 +24,7 @@ Spaced repetition jest naukowo udowodnioną metodą efektywnej nauki, jednak two
 - Brak satysfakcji z procesu tworzenia fiszek
 - Niską jakość pospiesznie stworzonych fiszek, co zmniejsza efektywność nauki
 
-FlashGen AI rozwiązuje te problemy poprzez automatyzację procesu tworzenia fiszek przy zachowaniu wysokiej jakości materiałów edukacyjnych.
+10xProject rozwiązuje te problemy poprzez automatyzację procesu tworzenia fiszek przy zachowaniu wysokiej jakości materiałów edukacyjnych.
 
 ## 3. Wymagania funkcjonalne
 
@@ -80,7 +80,7 @@ Ograniczenia techniczne:
 ## 5. Historyjki użytkowników
 
 ### US-001: Rejestracja nowego użytkownika
-**Tytuł**: Rejestracja w systemie FlashGen AI
+**Tytuł**: Rejestracja w systemie 10xProject
 
 **Opis**: Jako nowy użytkownik, chcę się zarejestrować w systemie, aby móc korzystać z funkcji tworzenia i przechowywania fiszek.
 
@@ -92,7 +92,7 @@ Ograniczenia techniczne:
 - Użytkownik może zalogować się po rejestracji
 
 ### US-002: Logowanie do systemu
-**Tytuł**: Logowanie do systemu FlashGen AI
+**Tytuł**: Logowanie do systemu 10xProject
 
 **Opis**: Jako zarejestrowany użytkownik, chcę się zalogować do systemu, aby uzyskać dostęp do moich fiszek.
 
@@ -212,7 +212,7 @@ Ograniczenia techniczne:
 - Po usunięciu konta, wszystkie dane użytkownika są usuwane z systemu
 
 ### US-012: Wylogowanie z systemu
-**Tytuł**: Wylogowanie z systemu FlashGen AI
+**Tytuł**: Wylogowanie z systemu 10xProject
 
 **Opis**: Jako zalogowany użytkownik, chcę się wylogować z systemu, aby zabezpieczyć moje konto na współdzielonym urządzeniu.
 

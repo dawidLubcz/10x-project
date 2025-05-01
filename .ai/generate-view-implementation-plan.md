@@ -1,7 +1,7 @@
 # Plan implementacji widoku generowania fiszek
 
 ## 1. Przegląd
-Widok generowania fiszek to jeden z kluczowych elementów aplikacji FlashGen AI, umożliwiający użytkownikom szybkie tworzenie wysokiej jakości fiszek edukacyjnych przy pomocy sztucznej inteligencji. Pozwala on użytkownikowi wprowadzić tekst źródłowy (do 100 znaków), wygenerować na jego podstawie zestaw fiszek w formacie pytanie-odpowiedź, a następnie przeprowadzić selekcję wygenerowanych fiszek poprzez akceptację, edycję lub odrzucenie.
+Widok generowania fiszek to jeden z kluczowych elementów aplikacji 10xProject, umożliwiający użytkownikom szybkie tworzenie wysokiej jakości fiszek edukacyjnych przy pomocy sztucznej inteligencji. Pozwala on użytkownikowi wprowadzić tekst źródłowy (do 100 znaków), wygenerować na jego podstawie zestaw fiszek w formacie pytanie-odpowiedź, a następnie przeprowadzić selekcję wygenerowanych fiszek poprzez akceptację, edycję lub odrzucenie.
 
 ## 2. Routing widoku
 Widok będzie dostępny pod ścieżką `/generate`. Ta ścieżka powinna być zarejestrowana w Astro jako strona aplikacji.

@@ -277,7 +277,7 @@ Dodać ograniczenie CHECK (source_text_length BETWEEN 1000 AND 10000) dla pola s
 Użyć wbudowanych w PostgreSQL triggerów dla automatycznej aktualizacji pola updated_at w tabeli flashcards
 </matched_recommendations>
 <database_planning_summary>
-Planowana baza danych dla aplikacji FlashGen AI ma być zbudowana na PostgreSQL za pośrednictwem Supabase. System będzie składał się z czterech głównych encji:
+Planowana baza danych dla aplikacji 10xProject ma być zbudowana na PostgreSQL za pośrednictwem Supabase. System będzie składał się z czterech głównych encji:
 users - zarządzana przez Supabase Auth, przechowująca podstawowe informacje o użytkowniku takie jak id, email, created_at, encrypted_password, confirmed_at.
 flashcards - przechowująca informacje o fiszkach:
 id (bigserial)

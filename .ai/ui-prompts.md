@@ -57,7 +57,7 @@ Pamiętaj, aby skupić się na jasności, trafności i dokładności wyników. N
 
 ---------------------
 
-Architektura UI dla MVP 10xCards
+Architektura UI dla MVP 10xProject
 Struktura główna
 Aplikacja będzie składać się z 5 kluczowych widoków, które zapewnią minimalną funkcjonalność wymaganą w PRD:
 Ekran uwierzytelniania - prosty formularz logowania/rejestracji bez weryfikacji email czy odzyskiwania hasła
@@ -194,7 +194,7 @@ Końcowy wynik powinien zawierać tylko treść w formacie markdown. Upewnij si�
 </matched_recommendations>
 
 <ui_architecture_planning_summary>
-# Architektura UI dla MVP 10xCards
+# Architektura UI dla MVP 10xProject
 
 ## Struktura główna
 Aplikacja będzie składać się z 5 kluczowych widoków, które zapewnią minimalną funkcjonalność wymaganą w PRD:

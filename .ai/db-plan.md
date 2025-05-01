@@ -1,4 +1,4 @@
-# Schemat bazy danych PostgreSQL dla FlashGen AI
+# Schemat bazy danych PostgreSQL dla 10xProject
 
 ## 1. Lista tabel
 

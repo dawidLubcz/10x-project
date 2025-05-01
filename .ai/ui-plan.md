@@ -1,8 +1,8 @@
-# Architektura UI dla 10xCards
+# Architektura UI dla 10xProject
 
 ## 1. Przegląd struktury UI
 
-Aplikacja 10xCards (FlashGen AI) zostanie zbudowana jako minimalistyczny, intuicyjny interfejs składający się z 5 głównych widoków. Wykorzysta komponenty Shadcn/ui osadzone w Astro z interaktywnymi częściami obsługiwanymi przez React. Struktura nawigacji będzie oparta na górnym pasku nawigacyjnym dostępnym na wszystkich stronach po zalogowaniu. Architektura koncentruje się na szybkim i efektywnym przepływie od wprowadzenia tekstu do generowania i zarządzania fiszkami, zgodnie z głównym celem produktu - oszczędzaniem czasu użytkownika.
+Aplikacja 10xProject zostanie zbudowana jako minimalistyczny, intuicyjny interfejs składający się z 5 głównych widoków. Wykorzysta komponenty Shadcn/ui osadzone w Astro z interaktywnymi częściami obsługiwanymi przez React. Struktura nawigacji będzie oparta na górnym pasku nawigacyjnym dostępnym na wszystkich stronach po zalogowaniu. Architektura koncentruje się na szybkim i efektywnym przepływie od wprowadzenia tekstu do generowania i zarządzania fiszkami, zgodnie z głównym celem produktu - oszczędzaniem czasu użytkownika.
 
 ## 2. Lista widoków
 

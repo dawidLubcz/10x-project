@@ -1,7 +1,7 @@
 # Plan implementacji widoku Dashboard
 
 ## 1. Przegląd
-Dashboard to główny widok aplikacji FlashGen AI, służący jako centralny punkt nawigacyjny oraz miejsce prezentacji podstawowych statystyk użytkownika. Widok zapewnia szybki dostęp do głównych funkcjonalności aplikacji, takich jak generowanie fiszek przez AI, manualne tworzenie fiszek, przeglądanie kolekcji oraz rozpoczęcie nauki. Dodatkowo, zawiera podstawowe statystyki dotyczące fiszek użytkownika oraz uproszczony formularz do szybkiego tworzenia nowych fiszek.
+Dashboard to główny widok aplikacji 10xProject, służący jako centralny punkt nawigacyjny oraz miejsce prezentacji podstawowych statystyk użytkownika. Widok zapewnia szybki dostęp do głównych funkcjonalności aplikacji, takich jak generowanie fiszek przez AI, manualne tworzenie fiszek, przeglądanie kolekcji oraz rozpoczęcie nauki. Dodatkowo, zawiera podstawowe statystyki dotyczące fiszek użytkownika oraz uproszczony formularz do szybkiego tworzenia nowych fiszek.
 
 ## 2. Routing widoku
 Widok Dashboard powinien być dostępny pod ścieżką główną `/`.

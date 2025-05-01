@@ -85,7 +85,7 @@ export class OpenRouterService {
       'Authorization': `Bearer ${this.apiKey}`,
       'Content-Type': 'application/json',
       'HTTP-Referer': 'https://10x-project.vercel.app/',
-      'X-Title': '10xCards'
+      'X-Title': '10xProject'
     };
     // Create HTTPS agent that accepts all certificates
     this.agent = new https.Agent({

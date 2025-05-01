@@ -1,5 +1,5 @@
 -- Migration: create_flashgen_tables
--- Description: Creates the base schema for FlashGen AI including flashcards, generations and error logs
+-- Description: Creates the base schema for 10xProject including flashcards, generations and error logs
 -- Created at: 2025-04-16 15:56:52 UTC
 -- Author: Database Schema Migration
 

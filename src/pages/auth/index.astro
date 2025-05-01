@@ -1,0 +1,43 @@
+---
+// Import komponentów
+import AuthLayout from "../../layouts/AuthLayout.astro";
+import AuthTabs from "../../components/auth/AuthTabs";
+import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
+
+// Parametr z URL określający domyślną zakładkę
+const tabParam = Astro.url.searchParams.get("tab");
+const isRegister = tabParam === "register";
+const pageTitle = isRegister ? "Rejestracja | 10xProject" : "Logowanie | 10xProject";
+---
+
+<AuthLayout title={pageTitle}>
+  <div class="w-full max-w-md mx-auto">
+    <Card client:load>
+      <CardHeader>
+        <CardTitle className="text-center">
+          {isRegister ? "Utwórz nowe konto" : "Zaloguj się do konta"}
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <AuthTabs client:load defaultTab={isRegister ? "register" : "login"} />
+      </CardContent>
+    </Card>
+    <div class="mt-6 text-center text-sm text-muted-foreground">
+      {isRegister ? (
+        <p>
+          Masz już konto?{" "}
+          <a href="/auth?tab=login" class="text-primary font-medium hover:underline">
+            Zaloguj się
+          </a>
+        </p>
+      ) : (
+        <p>
+          Nie masz jeszcze konta?{" "}
+          <a href="/auth?tab=register" class="text-primary font-medium hover:underline">
+            Zarejestruj się
+          </a>
+        </p>
+      )}
+    </div>
+  </div>
+</AuthLayout>

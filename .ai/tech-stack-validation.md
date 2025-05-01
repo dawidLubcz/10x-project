@@ -1,5 +1,4 @@
-
-# Analiza tech stacku dla FlashGen AI
+# Analiza tech stacku dla 10xProject
 
 ## 1. Szybkość dostarczenia MVP
 

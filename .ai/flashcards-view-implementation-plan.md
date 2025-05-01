@@ -1,7 +1,7 @@
 # Plan implementacji widoku Listy Fiszek
 
 ## 1. Przegląd
-Widok Listy Fiszek umożliwia użytkownikom przeglądanie, edytowanie i usuwanie ich kolekcji fiszek edukacyjnych. Jest to kluczowy element aplikacji FlashGen AI, pozwalający na zarządzanie materiałami do nauki. Interfejs zapewnia czytelną prezentację fiszek z pytaniami i odpowiedziami, z możliwością rozwijania pełnej treści, a także oferuje funkcje sortowania, filtrowania oraz paginacji dla wygodnego przeglądania dużych zbiorów fiszek.
+Widok Listy Fiszek umożliwia użytkownikom przeglądanie, edytowanie i usuwanie ich kolekcji fiszek edukacyjnych. Jest to kluczowy element aplikacji 10xProject, pozwalający na zarządzanie materiałami do nauki. Interfejs zapewnia czytelną prezentację fiszek z pytaniami i odpowiedziami, z możliwością rozwijania pełnej treści, a także oferuje funkcje sortowania, filtrowania oraz paginacji dla wygodnego przeglądania dużych zbiorów fiszek.
 
 ## 2. Routing widoku
 Widok będzie dostępny pod ścieżką `/flashcards` w aplikacji.
