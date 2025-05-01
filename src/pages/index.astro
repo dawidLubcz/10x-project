@@ -4,10 +4,22 @@ import StatisticsCard from "../components/dashboard/StatisticsCard";
 import ActionCardGrid from "../components/dashboard/ActionCardGrid";
 import QuickCreateForm from "../components/dashboard/QuickCreateForm";
 
+// Sprawdzenie autoryzacji
+const authToken = Astro.cookies.get("auth_token")?.value;
+
+// Jeśli brak tokenu, przekierowanie do strony logowania
+if (!authToken) {
+	return Astro.redirect("/auth");
+}
+
 // Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
 // Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
 
 const title = "Dashboard - 10xProject";
+
+// Get user email from session or auth system
+// This is a placeholder - replace with your actual auth implementation
+const userEmail = Astro.cookies.get("userEmail")?.value || "user@example.com";
 ---
 
 <Layout title={title}>
@@ -17,14 +29,21 @@ const title = "Dashboard - 10xProject";
 				<a href="/" class="text-2xl font-bold text-primary">10xProject</a>
 				<div class="flex items-center">
 					<nav class="mr-4">
-						<ul class="flex space-x-4">
-							<li><a href="/" class="text-zinc-900 dark:text-zinc-100 hover:text-primary transition-colors">Dashboard</a></li>
-							<li><a href="/flashcards" class="text-zinc-900 dark:text-zinc-100 hover:text-primary transition-colors">Fiszki</a></li>
-							<li><a href="/generate" class="text-zinc-900 dark:text-zinc-100 hover:text-primary transition-colors">Generator AI</a></li>
-							<li><a href="/learn" class="text-zinc-900 dark:text-zinc-100 hover:text-primary transition-colors">Nauka</a></li>
-							<li><a href="/profile" class="text-zinc-900 dark:text-zinc-100 hover:text-primary transition-colors">Profil</a></li>
+						<ul class="flex space-x-4 items-center">
+							<li><a href="/" class="px-3 py-1 rounded-md flex items-center text-zinc-900 dark:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors">Dashboard</a></li>
+							<li><a href="/flashcards" class="px-3 py-1 rounded-md flex items-center text-zinc-900 dark:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors">Fiszki</a></li>
+							<li><a href="/generate" class="px-3 py-1 rounded-md flex items-center text-zinc-900 dark:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors">Generator AI</a></li>
+							<li><a href="/learn" class="px-3 py-1 rounded-md flex items-center text-zinc-900 dark:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors">Nauka</a></li>
+							<li><a href="/profile" class="font-semibold text-primary bg-primary/10 px-3 py-1 rounded-md flex items-center gap-1 hover:bg-primary/20 transition-colors">
+								<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user"><circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 0 0-16 0"/></svg>
+								{userEmail}
+							</a></li>
 						</ul>
 					</nav>
+					<a href="javascript:void(0)" id="logout-button" class="font-semibold px-3 py-1 mr-3 rounded-md bg-red-500 hover:bg-red-600 text-white flex items-center gap-1 transition-colors">
+						<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-log-out"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+						Wyloguj
+					</a>
 					<button id="theme-toggle" class="p-2 rounded-full bg-zinc-200 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 hover:bg-zinc-300 dark:hover:bg-zinc-700 transition-colors">
 						<span class="theme-toggle-icon inline-block w-5 h-5"></span>
 					</button>
@@ -101,6 +120,41 @@ const title = "Dashboard - 10xProject";
 		
 		if (themeToggleButton && typeof toggleFn === 'function') {
 			themeToggleButton.addEventListener('click', toggleFn);
+		}
+
+		// Obsługa wylogowania
+		const logoutButton = document.getElementById('logout-button');
+		if (logoutButton) {
+			logoutButton.addEventListener('click', async () => {
+				try {
+					const response = await fetch('/api/users/logout', {
+						method: 'POST',
+					});
+					
+					if (!response.ok) {
+						throw new Error('Nie udało się wylogować');
+					}
+					
+					// Czyszczenie localStorage/cookies
+					localStorage.removeItem('auth_token');
+					localStorage.removeItem('user_id');
+					localStorage.removeItem('user_email');
+					
+					// Usuwanie ciasteczka
+					document.cookie = "auth_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Strict";
+					
+					// Przekierowanie do strony logowania
+					window.location.href = '/auth';
+				} catch (error) {
+					console.error('Błąd podczas wylogowywania:', error);
+					// Nawet jeśli wystąpi błąd, próbujemy wylogować lokalnie
+					localStorage.removeItem('auth_token');
+					localStorage.removeItem('user_id');
+					localStorage.removeItem('user_email');
+					document.cookie = "auth_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Strict";
+					window.location.href = '/auth';
+				}
+			});
 		}
 	});
 </script>
