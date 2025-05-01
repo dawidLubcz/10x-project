@@ -6,9 +6,6 @@ import type { Database } from '../../db/database.types';
 // Disable prerendering for dynamic response
 export const prerender = false;
 
-// Predefined user ID for testing
-const TEST_USER_ID = "a5a661c1-13ed-4116-8a65-9fe8dd3f0341";
-
 // Schema validation for input
 const GenerationSchema = z.object({
   input_text: z.string()
@@ -20,6 +17,54 @@ export const POST: APIRoute = async ({ request, locals }) => {
   try {
     // Get Supabase client from context
     const supabase = locals.supabase;
+
+    // Pobierz token uwierzytelniający
+    const authHeader = request.headers.get('Authorization');
+    const tokenFromHeader = authHeader ? authHeader.replace('Bearer ', '') : null;
+    
+    // Pobierz token z ciasteczka
+    const cookieHeader = request.headers.get('Cookie');
+    let tokenFromCookie = null;
+    
+    if (cookieHeader) {
+      const cookies = cookieHeader.split(';').map(c => c.trim());
+      const authCookie = cookies.find(c => c.startsWith('auth_token='));
+      if (authCookie) {
+        tokenFromCookie = authCookie.split('=')[1];
+      }
+    }
+    
+    // Użyj tokenu z nagłówka lub ciasteczka
+    const token = tokenFromHeader || tokenFromCookie;
+    
+    // Pobierz użytkownika na podstawie tokenu
+    let userId = null;
+    
+    if (token) {
+      // Weryfikacja tokenu przez Supabase
+      const { data } = await supabase.auth.getUser(token);
+      if (data.user) {
+        userId = data.user.id;
+      }
+    } else {
+      // Próba pobrania sesji jako alternatywa
+      const { data: { session } } = await supabase.auth.getSession();
+      userId = session?.user?.id;
+    }
+    
+    // Sprawdzenie autoryzacji
+    if (!userId) {
+      return new Response(
+        JSON.stringify({
+          error: "Unauthorized",
+          message: "Musisz być zalogowany, aby korzystać z generatora."
+        }),
+        {
+          status: 401,
+          headers: { 'Content-Type': 'application/json' }
+        }
+      );
+    }
 
     // Initialize AI Generation Service
     const aiService = new AIGenerationService(
@@ -49,7 +94,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
     const { input_text } = validationResult.data;
     
     // Generate flashcards using AI service
-    const generatedData = await aiService.generateFlashcards(input_text, TEST_USER_ID);
+    const generatedData = await aiService.generateFlashcards(input_text, userId);
     
     // Return response
     return new Response(

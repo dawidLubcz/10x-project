@@ -1,13 +1,13 @@
 ---
-import Layout from "../layouts/Layout.astro";
-import StatisticsCard from "../components/dashboard/StatisticsCard";
-import ActionCardGrid from "../components/dashboard/ActionCardGrid";
-import QuickCreateForm from "../components/dashboard/QuickCreateForm";
+import Layout from '../layouts/Layout.astro';
+import UserInfoContainer from '../components/profile/UserInfoContainer';
+import ChangePasswordForm from '../components/profile/ChangePasswordForm';
+import DeleteAccountSection from '../components/profile/DeleteAccountSection';
+import LogoutButton from '../components/profile/LogoutButton';
+import { useProfile } from '../lib/hooks/useProfile';
 
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
-
-const title = "Dashboard - 10xProject";
+// Tytuł strony
+const title = "Profil użytkownika - 10xProject";
 ---
 
 <Layout title={title}>
@@ -33,54 +33,26 @@ const title = "Dashboard - 10xProject";
 		</header>
 
 		<main class="flex-grow bg-zinc-100 dark:bg-zinc-950">
-			<div class="container mx-auto px-4 py-8 space-y-8">
-				<h1 class="text-3xl font-bold mb-8 text-center text-zinc-900 dark:text-zinc-50">Dashboard</h1>
+			<div class="container mx-auto px-4 py-8">
+				<h1 class="text-3xl font-bold mb-8 text-center text-zinc-900 dark:text-zinc-50">Profil użytkownika</h1>
 				
-				<div id="statistics-container">
-					<StatisticsCard client:load />
+				<div class="max-w-3xl mx-auto space-y-8">
+					<div id="profile-info">
+						<UserInfoContainer client:load />
+					</div>
+					
+					<div id="change-password-section">
+						<ChangePasswordForm client:load />
+					</div>
+					
+					<div id="delete-account-section">
+						<DeleteAccountSection client:load />
+					</div>
+					
+					<div id="logout-section">
+						<LogoutButton client:load />
+					</div>
 				</div>
-				
-				<section>
-					<h2 class="text-2xl font-bold mb-4 text-zinc-900 dark:text-zinc-50">Szybki dostęp</h2>
-					<ActionCardGrid 
-						client:load
-						actions={[
-							{
-								title: "Generuj z AI",
-								description: "Utwórz fiszki automatycznie za pomocą sztucznej inteligencji",
-								icon: "A",
-								linkTo: "/generate",
-								variant: "primary"
-							},
-							{
-								title: "Utwórz manualnie",
-								description: "Dodaj własne fiszki ręcznie",
-								icon: "U",
-								linkTo: "/create",
-								variant: "default"
-							},
-							{
-								title: "Przeglądaj fiszki",
-								description: "Przeglądaj i zarządzaj swoimi fiszkami",
-								icon: "P",
-								linkTo: "/flashcards",
-								variant: "default"
-							},
-							{
-								title: "Rozpocznij naukę",
-								description: "Zacznij sesję nauki z wykorzystaniem fiszek",
-								icon: "N",
-								linkTo: "/learn",
-								variant: "secondary"
-							}
-						]}
-					/>
-				</section>
-				
-				<section>
-					<h2 class="text-2xl font-bold mb-4 text-zinc-900 dark:text-zinc-50">Szybkie tworzenie fiszki</h2>
-					<QuickCreateForm client:load />
-				</section>
 			</div>
 		</main>
 
@@ -93,14 +65,21 @@ const title = "Dashboard - 10xProject";
 </Layout>
 
 <script>
-	// Inicjalizacja przycisku po załadowaniu strony
+	// Sprawdzenie, czy użytkownik jest zalogowany
 	document.addEventListener('DOMContentLoaded', () => {
+		// Sprawdź, czy token jest w localStorage
+		const token = localStorage.getItem('auth_token');
+		if (!token) {
+			// Przekierowanie do strony logowania
+			window.location.href = '/auth?redirect=/profile';
+		}
+		
+		// Inicjalizacja przycisku motywu
 		const themeToggleButton = document.getElementById('theme-toggle');
-		// Używamy as any, aby TypeScript nie zgłaszał błędu
 		const toggleFn = (window as any).toggleTheme;
 		
 		if (themeToggleButton && typeof toggleFn === 'function') {
 			themeToggleButton.addEventListener('click', toggleFn);
 		}
 	});
-</script>
+</script> 

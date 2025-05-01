@@ -5,9 +5,6 @@ import { FlashcardSource } from '../../../../../types';
 // Disable prerendering for dynamic response
 export const prerender = false;
 
-// Predefined user ID for testing
-const TEST_USER_ID = "a5a661c1-13ed-4116-8a65-9fe8dd3f0341";
-
 // Schema validation for flashcard actions
 const FlashcardActionSchema = z.discriminatedUnion('action', [
   z.object({
@@ -29,6 +26,20 @@ export const PATCH: APIRoute = async ({ request, params, locals }) => {
   try {
     // Get supabase client from locals
     const supabase = locals.supabase;
+    
+    // Get current user session
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    // Check if user is authenticated
+    if (!session?.user?.id) {
+      return new Response(
+        JSON.stringify({ error: "Unauthorized - User not authenticated" }),
+        { status: 401, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+    
+    // Get user ID from session
+    const userId = session.user.id;
     
     // Extract path parameters
     const { generationId, flashcardId } = params;
@@ -87,7 +98,7 @@ export const PATCH: APIRoute = async ({ request, params, locals }) => {
         const { data: flashcard, error } = await supabase
           .from('flashcards')
           .insert({
-            user_id: TEST_USER_ID,
+            user_id: userId,
             front: action.front,
             back: action.back,
             source: FlashcardSource.AI_FULL,
@@ -147,7 +158,7 @@ export const PATCH: APIRoute = async ({ request, params, locals }) => {
         const { data: flashcard, error } = await supabase
           .from('flashcards')
           .insert({
-            user_id: TEST_USER_ID,
+            user_id: userId,
             front: action.front,
             back: action.back,
             source: FlashcardSource.AI_EDITED,
@@ -177,7 +188,7 @@ export const PATCH: APIRoute = async ({ request, params, locals }) => {
             .from('flashcards')
             .select('id')
             .eq('generation_id', numericGenerationId)
-            .eq('user_id', TEST_USER_ID)
+            .eq('user_id', userId)
             .eq('front', action.front)
             .eq('source', FlashcardSource.AI_FULL)
             .maybeSingle();

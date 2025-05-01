@@ -3,9 +3,6 @@ import { FlashcardService } from '../../../lib/services/flashcard.service';
 import { flashcardIdSchema } from '../../../lib/schemas/flashcard.schemas';
 import { ZodError } from 'zod';
 
-// Testowy ID użytkownika - taki sam jak w src/pages/api/flashcards.ts
-const TEST_USER_ID = "a5a661c1-13ed-4116-8a65-9fe8dd3f0341";
-
 export const GET: APIRoute = async ({ params, locals, request }) => {
   try {
     // Walidacja ID fiszki
@@ -14,28 +11,52 @@ export const GET: APIRoute = async ({ params, locals, request }) => {
     
     // Pobieranie supabase z kontekstu
     const supabase = locals.supabase;
+    
+    // Pobierz token uwierzytelniający
+    const authHeader = request.headers.get('Authorization');
+    const tokenFromHeader = authHeader ? authHeader.replace('Bearer ', '') : null;
+    
+    // Pobierz token z ciasteczka
+    const cookieHeader = request.headers.get('Cookie');
+    let tokenFromCookie = null;
+    
+    if (cookieHeader) {
+      const cookies = cookieHeader.split(';').map(c => c.trim());
+      const authCookie = cookies.find(c => c.startsWith('auth_token='));
+      if (authCookie) {
+        tokenFromCookie = authCookie.split('=')[1];
+      }
+    }
+    
+    // Użyj tokenu z nagłówka lub ciasteczka
+    const token = tokenFromHeader || tokenFromCookie;
+    
+    // Pobierz użytkownika na podstawie tokenu
     let userId = null;
     
-    // Użyj testowego ID lub pobierz z sesji
-    if (TEST_USER_ID !== null) {
-      userId = TEST_USER_ID;
-    } else {
-      // Pobranie sesji użytkownika
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      // Sprawdzenie autoryzacji
-      if (!session) {
-        return new Response(JSON.stringify({
-          error: {
-            code: "UNAUTHORIZED",
-            message: "Musisz być zalogowany, aby uzyskać dostęp do fiszki."
-          }
-        }), {
-          status: 401,
-          headers: { 'Content-Type': 'application/json' }
-        });
+    if (token) {
+      // Weryfikacja tokenu przez Supabase
+      const { data } = await supabase.auth.getUser(token);
+      if (data.user) {
+        userId = data.user.id;
       }
-      userId = session.user.id;
+    } else {
+      // Próba pobrania sesji jako alternatywa
+      const { data: { session } } = await supabase.auth.getSession();
+      userId = session?.user?.id;
+    }
+    
+    // Sprawdzenie autoryzacji
+    if (!userId) {
+      return new Response(JSON.stringify({
+        error: {
+          code: "UNAUTHORIZED",
+          message: "Musisz być zalogowany, aby uzyskać dostęp do fiszki."
+        }
+      }), {
+        status: 401,
+        headers: { 'Content-Type': 'application/json' }
+      });
     }
 
     // Pobranie fiszki z serwisu
@@ -102,28 +123,52 @@ export const PUT: APIRoute = async ({ params, locals, request }) => {
     
     // Pobieranie supabase z kontekstu
     const supabase = locals.supabase;
+    
+    // Pobierz token uwierzytelniający
+    const authHeader = request.headers.get('Authorization');
+    const tokenFromHeader = authHeader ? authHeader.replace('Bearer ', '') : null;
+    
+    // Pobierz token z ciasteczka
+    const cookieHeader = request.headers.get('Cookie');
+    let tokenFromCookie = null;
+    
+    if (cookieHeader) {
+      const cookies = cookieHeader.split(';').map(c => c.trim());
+      const authCookie = cookies.find(c => c.startsWith('auth_token='));
+      if (authCookie) {
+        tokenFromCookie = authCookie.split('=')[1];
+      }
+    }
+    
+    // Użyj tokenu z nagłówka lub ciasteczka
+    const token = tokenFromHeader || tokenFromCookie;
+    
+    // Pobierz użytkownika na podstawie tokenu
     let userId = null;
     
-    // Użyj testowego ID lub pobierz z sesji
-    if (TEST_USER_ID !== null) {
-      userId = TEST_USER_ID;
-    } else {
-      // Pobranie sesji użytkownika
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      // Sprawdzenie autoryzacji
-      if (!session) {
-        return new Response(JSON.stringify({
-          error: {
-            code: "UNAUTHORIZED",
-            message: "Musisz być zalogowany, aby zaktualizować fiszkę."
-          }
-        }), {
-          status: 401,
-          headers: { 'Content-Type': 'application/json' }
-        });
+    if (token) {
+      // Weryfikacja tokenu przez Supabase
+      const { data } = await supabase.auth.getUser(token);
+      if (data.user) {
+        userId = data.user.id;
       }
-      userId = session.user.id;
+    } else {
+      // Próba pobrania sesji jako alternatywa
+      const { data: { session } } = await supabase.auth.getSession();
+      userId = session?.user?.id;
+    }
+    
+    // Sprawdzenie autoryzacji
+    if (!userId) {
+      return new Response(JSON.stringify({
+        error: {
+          code: "UNAUTHORIZED",
+          message: "Musisz być zalogowany, aby zaktualizować fiszkę."
+        }
+      }), {
+        status: 401,
+        headers: { 'Content-Type': 'application/json' }
+      });
     }
 
     // Pobranie danych z body
@@ -192,28 +237,52 @@ export const DELETE: APIRoute = async ({ params, locals, request }) => {
     
     // Pobieranie supabase z kontekstu
     const supabase = locals.supabase;
+    
+    // Pobierz token uwierzytelniający
+    const authHeader = request.headers.get('Authorization');
+    const tokenFromHeader = authHeader ? authHeader.replace('Bearer ', '') : null;
+    
+    // Pobierz token z ciasteczka
+    const cookieHeader = request.headers.get('Cookie');
+    let tokenFromCookie = null;
+    
+    if (cookieHeader) {
+      const cookies = cookieHeader.split(';').map(c => c.trim());
+      const authCookie = cookies.find(c => c.startsWith('auth_token='));
+      if (authCookie) {
+        tokenFromCookie = authCookie.split('=')[1];
+      }
+    }
+    
+    // Użyj tokenu z nagłówka lub ciasteczka
+    const token = tokenFromHeader || tokenFromCookie;
+    
+    // Pobierz użytkownika na podstawie tokenu
     let userId = null;
     
-    // Użyj testowego ID lub pobierz z sesji
-    if (TEST_USER_ID !== null) {
-      userId = TEST_USER_ID;
-    } else {
-      // Pobranie sesji użytkownika
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      // Sprawdzenie autoryzacji
-      if (!session) {
-        return new Response(JSON.stringify({
-          error: {
-            code: "UNAUTHORIZED",
-            message: "Musisz być zalogowany, aby usunąć fiszkę."
-          }
-        }), {
-          status: 401,
-          headers: { 'Content-Type': 'application/json' }
-        });
+    if (token) {
+      // Weryfikacja tokenu przez Supabase
+      const { data } = await supabase.auth.getUser(token);
+      if (data.user) {
+        userId = data.user.id;
       }
-      userId = session.user.id;
+    } else {
+      // Próba pobrania sesji jako alternatywa
+      const { data: { session } } = await supabase.auth.getSession();
+      userId = session?.user?.id;
+    }
+    
+    // Sprawdzenie autoryzacji
+    if (!userId) {
+      return new Response(JSON.stringify({
+        error: {
+          code: "UNAUTHORIZED",
+          message: "Musisz być zalogowany, aby usunąć fiszkę."
+        }
+      }), {
+        status: 401,
+        headers: { 'Content-Type': 'application/json' }
+      });
     }
 
     // Usunięcie fiszki
@@ -269,4 +338,4 @@ export const DELETE: APIRoute = async ({ params, locals, request }) => {
 };
 
 // Ustawienie eksportu do SSR
-export const prerender = false; 
+export const prerender = false;

@@ -6,8 +6,12 @@ import type { AuthTabsProps } from './types';
 
 export function AuthTabs({ defaultTab = "login" }: AuthTabsProps) {
   const handleSuccess = () => {
-    // In a real application, we would redirect to the dashboard or homepage
-    window.location.href = '/';
+    // Sprawdź, czy istnieje parametr redirect w URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const redirectPath = urlParams.get('redirect');
+    
+    // Przekieruj do podanej ścieżki lub na stronę główną
+    window.location.href = redirectPath || '/';
   };
   
   return (

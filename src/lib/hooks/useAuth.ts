@@ -124,6 +124,9 @@ export function useAuth() {
       // Zapisanie tokenu do localStorage
       if (data.token) {
         localStorage.setItem('auth_token', data.token);
+        
+        // Zapisanie tokenu również jako ciasteczko
+        document.cookie = `auth_token=${data.token}; path=/; max-age=2592000; SameSite=Strict`;
       }
       
       // Zapisanie danych użytkownika

@@ -129,28 +129,19 @@ export class AIGenerationService {
         throw new Error(`Failed to save generation data: ${generationError.message}`);
       }
       
-      // Save flashcards to the database with proper generation_id
-      const { data: savedFlashcards, error: flashcardsError } = await this.supabaseClient
-        .from("flashcards")
-        .insert(
-          generatedFlashcards.map(card => ({
-            front: card.front,
-            back: card.back,
-            source: card.source,
-            user_id: userId,
-            generation_id: generationData.id
-          }))
-        )
-        .select();
-      
-      if (flashcardsError) {
-        console.error("Error saving flashcards:", flashcardsError);
-        throw new Error(`Failed to save flashcards: ${flashcardsError.message}`);
-      }
+      // Map flashcards with generation ID but DON'T save them to the database yet
+      // They will be saved individually when accepted by the user
+      const flashcardsWithGenerationId = generatedFlashcards.map(card => ({
+        front: card.front,
+        back: card.back,
+        source: card.source,
+        user_id: userId,
+        generation_id: generationData.id
+      })) as GeneratedFlashcardDto[];
       
       return {
         generation_id: generationData.id,
-        flashcards: savedFlashcards as GeneratedFlashcardDto[]
+        flashcards: flashcardsWithGenerationId
       };
     } catch (error) {
       console.error("Error in generateFlashcards:", error);

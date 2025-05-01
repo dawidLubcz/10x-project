@@ -30,15 +30,14 @@ const authMiddleware = defineMiddleware(async (context, next) => {
     return next();
   }
 
-  // Check if the user is authenticated
-  // In a real app, this would validate the token with Supabase
+  // Check if the user is authenticated using cookies
   const isAuthenticated = context.cookies.has('auth_token');
   const isProtectedRoute = protectedRoutes.some(route => path.startsWith(route));
 
   // If user is not authenticated and trying to access a protected route
   if (!isAuthenticated && isProtectedRoute) {
-    // Redirect to login page
-    return Response.redirect(`${url.origin}/auth`, 302);
+    // Redirect to login page with redirect parameter
+    return Response.redirect(`${url.origin}/auth?redirect=${path}`, 302);
   }
 
   // Continue with the request

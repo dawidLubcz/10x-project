@@ -7,9 +7,37 @@ import type { UserDto } from "../../../types";
 export const prerender = false;
 
 export const GET: APIRoute = async ({ request, locals }) => {
-  // Sprawdzenie sesji użytkownika
-  const session = await locals.supabase.auth.getSession();
-  const user = session.data.session?.user;
+  // Pobierz token z nagłówka Authorization
+  const authHeader = request.headers.get('Authorization');
+  const tokenFromHeader = authHeader ? authHeader.replace('Bearer ', '') : null;
+  
+  // Alternatywnie możemy pobrać token z cookie (obsługiwane przez middleware)
+  const cookieHeader = request.headers.get('Cookie');
+  let tokenFromCookie = null;
+  
+  if (cookieHeader) {
+    const cookies = cookieHeader.split(';').map(c => c.trim());
+    const authCookie = cookies.find(c => c.startsWith('auth_token='));
+    if (authCookie) {
+      tokenFromCookie = authCookie.split('=')[1];
+    }
+  }
+  
+  // Użyj tokenu z nagłówka lub z cookie
+  const token = tokenFromHeader || tokenFromCookie;
+
+  // Sprawdzenie sesji użytkownika na podstawie tokenu
+  let user = null;
+  
+  if (token) {
+    // Najpierw próbujemy zweryfikować token poprzez Supabase
+    const { data } = await locals.supabase.auth.getUser(token);
+    user = data.user;
+  } else {
+    // Jeśli brak tokenu, spróbuj pobrać sesję (dla kompatybilności wstecznej)
+    const session = await locals.supabase.auth.getSession();
+    user = session.data.session?.user;
+  }
 
   if (!user) {
     return new Response(
@@ -23,26 +51,11 @@ export const GET: APIRoute = async ({ request, locals }) => {
     );
   }
 
-  // Pobranie danych użytkownika bezpośrednio z supabase auth
-  const { data: userData, error: userError } = await locals.supabase.auth.getUser();
-  
-  if (userError || !userData.user) {
-    return new Response(
-      JSON.stringify({ error: "Unauthorized", message: "Nie znaleziono profilu użytkownika" }),
-      {
-        status: 401,
-        headers: {
-          "Content-Type": "application/json"
-        }
-      }
-    );
-  }
-
   // Utworzenie obiektu UserDto
   const userProfile: UserDto = {
-    id: userData.user.id,
-    email: userData.user.email || "",
-    created_at: userData.user.created_at
+    id: user.id,
+    email: user.email || "",
+    created_at: user.created_at
   };
 
   // Walidacja odpowiedzi
