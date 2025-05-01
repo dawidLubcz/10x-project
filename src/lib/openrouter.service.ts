@@ -22,6 +22,7 @@ export interface ResponseFormat {
 export interface ChatResponse {
   content: string;
   structured: any;
+  model?: string;
 }
 
 export interface OpenRouterOptions {
@@ -175,6 +176,7 @@ export class OpenRouterService {
     return {
       content: typeof content === 'string' ? content : JSON.stringify(content),
       structured,
+      model: raw.model || this.model // Use the model from response or fall back to the default
     };
   }
 

@@ -91,22 +91,89 @@ export class AIGenerationService {
     try {
       console.log("Starting flashcard generation for user:", userId);
       
+      // Ensure input text meets minimum length requirement (for database constraint)
+      const MIN_TEXT_LENGTH = 1000;
+      if (inputText.length < MIN_TEXT_LENGTH) {
+        throw new Error(`Input text must be at least ${MIN_TEXT_LENGTH} characters long (currently ${inputText.length} characters)`);
+      }
+      
       // Generate hash of input text
       const sourceTextHash = this.generateTextHash(inputText);
       console.log("Generated hash:", sourceTextHash);
       
       // Call AI to generate flashcards
-      const generatedFlashcards = await this.callAIForFlashcards(inputText);
-      console.log("Generated flashcards count:", generatedFlashcards.length);
+      const aiResponse = await this.callAIForFlashcards(inputText);
+      const generatedFlashcards = aiResponse.flashcards;
+      const model = aiResponse.model || 'qwen/qwen3-1.7b:free'; // Use actual model from response or default
       
-      // TODO: Add database operations for production
+      console.log("Generated flashcards count:", generatedFlashcards.length);
+      console.log("Using model:", model);
+      
+      // Save generation data to the database
+      const { data: generationData, error: generationError } = await this.supabaseClient
+        .from("generations")
+        .insert({
+          user_id: userId,
+          source_text_hash: sourceTextHash,
+          source_text_length: inputText.length,
+          model: model,
+          generated_count: generatedFlashcards.length,
+          accepted_edited_count: 0,
+          accepted_unedited_count: 0
+        })
+        .select()
+        .single();
+      
+      if (generationError) {
+        console.error("Error saving generation data:", generationError);
+        throw new Error(`Failed to save generation data: ${generationError.message}`);
+      }
+      
+      // Save flashcards to the database with proper generation_id
+      const { data: savedFlashcards, error: flashcardsError } = await this.supabaseClient
+        .from("flashcards")
+        .insert(
+          generatedFlashcards.map(card => ({
+            front: card.front,
+            back: card.back,
+            source: card.source,
+            user_id: userId,
+            generation_id: generationData.id
+          }))
+        )
+        .select();
+      
+      if (flashcardsError) {
+        console.error("Error saving flashcards:", flashcardsError);
+        throw new Error(`Failed to save flashcards: ${flashcardsError.message}`);
+      }
       
       return {
-        generation_id: Date.now(), // Temporary ID until DB integration
-        flashcards: generatedFlashcards
+        generation_id: generationData.id,
+        flashcards: savedFlashcards as GeneratedFlashcardDto[]
       };
     } catch (error) {
       console.error("Error in generateFlashcards:", error);
+      
+      // Log error to the database
+      if (inputText) {
+        try {
+          const sourceTextHash = this.generateTextHash(inputText);
+          await this.supabaseClient
+            .from("generation_error_logs")
+            .insert({
+              user_id: userId,
+              error_code: error instanceof Error ? error.name : "UNKNOWN_ERROR",
+              error_message: error instanceof Error ? error.message : String(error),
+              source_text_hash: sourceTextHash,
+              source_text_length: inputText.length,
+              model: 'qwen/qwen3-1.7b:free' // Default model from OpenRouter
+            });
+        } catch (logError) {
+          console.error("Failed to log error:", logError);
+        }
+      }
+      
       if (error instanceof Error) {
         throw new Error(`Failed to generate flashcards: ${error.message}`);
       }
@@ -119,7 +186,7 @@ export class AIGenerationService {
    * @param inputText - Text to generate flashcards from 
    * @returns Array of generated flashcards
    */
-  private async callAIForFlashcards(inputText: string): Promise<GeneratedFlashcardDto[]> {
+  private async callAIForFlashcards(inputText: string): Promise<{flashcards: GeneratedFlashcardDto[], model: string}> {
     try {
       console.log('Calling OpenRouter with input:', inputText);
       
@@ -140,11 +207,16 @@ export class AIGenerationService {
       }
 
       // Transform the structured response into our DTO format
-      return response.structured.flashcards.map((card: { front: string; back: string }) => ({
+      const flashcards = response.structured.flashcards.map((card: { front: string; back: string }) => ({
         front: card.front,
         back: card.back,
         source: FlashcardSource.AI_FULL
       }));
+      
+      return {
+        flashcards,
+        model: response.model || 'qwen/qwen3-1.7b:free'
+      };
     } catch (error) {
       console.error("Error calling AI service:", error);
       throw error;

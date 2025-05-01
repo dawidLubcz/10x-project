@@ -16,6 +16,7 @@ export const InputForm = ({
   onSubmit,
   isGenerating
 }: InputFormProps) => {
+  const MIN_LENGTH = 1000;
   const MAX_LENGTH = 10000;
   const [isValid, setIsValid] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -25,6 +26,9 @@ export const InputForm = ({
     if (inputText.length === 0) {
       setIsValid(false);
       setError('Tekst nie może być pusty');
+    } else if (inputText.length < MIN_LENGTH) {
+      setIsValid(false);
+      setError(`Tekst musi zawierać co najmniej ${MIN_LENGTH} znaków (obecnie ${inputText.length})`);
     } else if (inputText.length > MAX_LENGTH) {
       setIsValid(false);
       setError(`Tekst nie może przekraczać ${MAX_LENGTH} znaków`);
@@ -44,6 +48,7 @@ export const InputForm = ({
 
   const charsRemaining = MAX_LENGTH - inputText.length;
   const isOverLimit = charsRemaining < 0;
+  const isBelowMinimum = inputText.length < MIN_LENGTH;
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4 max-w-7xl mx-auto p-4 rounded-lg bg-white dark:bg-gray-800 shadow-sm">
@@ -52,8 +57,10 @@ export const InputForm = ({
         
         <div className="space-y-2">
           <div className="flex justify-between items-center mb-2">
-            <span className={`text-sm ${isOverLimit ? 'text-red-500' : 'text-gray-500 dark:text-gray-400'}`}>
-              {charsRemaining} znaków pozostało
+            <span className={`text-sm ${isOverLimit ? 'text-red-500' : isBelowMinimum ? 'text-yellow-500' : 'text-gray-500 dark:text-gray-400'}`}>
+              {isBelowMinimum 
+                ? `Minimalna długość: ${MIN_LENGTH} znaków (brakuje ${MIN_LENGTH - inputText.length})` 
+                : `${charsRemaining} znaków pozostało`}
             </span>
           </div>
           
@@ -61,8 +68,8 @@ export const InputForm = ({
             id="inputText"
             value={inputText}
             onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setInputText(e.target.value)}
-            placeholder="Wprowadź tekst do wygenerowania fiszek (maks. 10000 znaków)"
-            className={`min-h-36 w-full rounded-md border ${isOverLimit ? 'border-red-500' : 'border-gray-300 focus:border-blue-500 dark:border-gray-600'} p-3 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all`}
+            placeholder={`Wprowadź tekst do wygenerowania fiszek (min. ${MIN_LENGTH}, maks. ${MAX_LENGTH} znaków)`}
+            className={`min-h-36 w-full rounded-md border ${isOverLimit ? 'border-red-500' : isBelowMinimum ? 'border-yellow-500' : 'border-gray-300 focus:border-blue-500 dark:border-gray-600'} p-3 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all`}
             disabled={isGenerating}
           />
           
