@@ -1,44 +1,64 @@
 flowchart TD
-    subgraph "Interfejs Użytkownika"
-        A["/auth strona"] --> B["AuthTabs"]
-        B --> C["LoginForm"]
-        B --> D["RegisterForm"]
-        D --> |"Sukces"| E["Alert sukcesu"]
-        E --> C
+    A["/auth strona"] --> B["AuthTabs"]
+    B --> C["LoginForm"]
+    B --> D["RegisterForm"]
+    D -->|"Sukces"| E["Alert sukcesu"]
+    E --> C
+    
+    C --> F["useAuth.login"]
+    D --> G["useAuth.register"]
+    H["useLogout"] -->|"Wylogowanie"| I["Przekierowanie do /auth"]
+    
+    F --> J["/api/users/login"]
+    G --> K["/api/users/register"]
+    L["/api/users/logout"] <-- H
+    
+    J --> M["Supabase Auth"]
+    K --> M
+    L --> M
+    
+    M -->|"JWT Token"| N["localStorage/cookies"]
+    N --> O["AuthMiddleware"]
+    O -->|"Chronione strony"| P["Strony aplikacji"]
+    P -->|"Guzik wyloguj"| H
+    
+    subgraph UI [Interfejs Użytkownika]
+        A
+        B
+        C
+        D
+        E
     end
     
-    subgraph "Hooki React"
-        C --> F["useAuth.login"]
-        D --> G["useAuth.register"]
-        H["useLogout"] --> |"Wylogowanie"| I["Przekierowanie do /auth"]
+    subgraph Hooks [Hooki React]
+        F
+        G
+        H
+        I
     end
     
-    subgraph "API Endpointy"
-        F --> J["/api/users/login"]
-        G --> K["/api/users/register"]
-        L["/api/users/logout"] <-- H
+    subgraph API [API Endpointy]
+        J
+        K
+        L
     end
     
-    subgraph "Baza Danych"
-        M["Supabase Auth"]
-        J --> M
-        K --> M
-        L --> M
+    subgraph DB [Baza Danych]
+        M
     end
     
-    subgraph "Zarządzanie Sesją"
-        M --> |"JWT Token"| N["localStorage/cookies"]
-        N --> O["AuthMiddleware"]
-        O --> |"Chronione strony"| P["Strony aplikacji"]
-        P --> |"Guzik wyloguj"| H
+    subgraph Session [Zarządzanie Sesją]
+        N
+        O
+        P
     end
     
-    classDef primary fill:#d4f1f9,stroke:#05a5d1,stroke-width:2px;
-    classDef secondary fill:#ffd8b1,stroke:#ff9800,stroke-width:2px;
-    classDef success fill:#c8e6c9,stroke:#4caf50,stroke-width:2px;
-    classDef warning fill:#fff9c4,stroke:#ffeb3b,stroke-width:2px;
+    classDef primary fill:#d4f1f9,stroke:#05a5d1,stroke-width:2px
+    classDef secondary fill:#ffd8b1,stroke:#ff9800,stroke-width:2px
+    classDef success fill:#c8e6c9,stroke:#4caf50,stroke-width:2px
+    classDef warning fill:#fff9c4,stroke:#ffeb3b,stroke-width:2px
     
-    class A,B,C,D,E primary;
-    class F,G,H secondary;
-    class J,K,L warning;
-    class M,N,O,P success;
+    class A,B,C,D,E primary
+    class F,G,H,I secondary
+    class J,K,L warning
+    class M,N,O,P success
