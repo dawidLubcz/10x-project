@@ -17,9 +17,27 @@ if (!authToken) {
 
 const title = "Dashboard - 10xProject";
 
-// Get user email from session or auth system
-// This is a placeholder - replace with your actual auth implementation
-const userEmail = Astro.cookies.get("userEmail")?.value || "user@example.com";
+// Pobieranie adresu email zalogowanego użytkownika
+let userEmail;
+try {
+	// Pobierz informacje o zalogowanym użytkowniku z API
+	const response = await fetch(`${Astro.url.origin}/api/users/current`, {
+		headers: {
+			"Cookie": `auth_token=${authToken}`
+		}
+	});
+	
+	if (response.ok) {
+		const userData = await response.json();
+		userEmail = userData.email;
+	} else {
+		// Jeśli nie można pobrać danych użytkownika, użyj localStorage po stronie klienta
+		userEmail = null;
+	}
+} catch (error) {
+	console.error("Błąd podczas pobierania danych użytkownika:", error);
+	userEmail = null;
+}
 ---
 
 <Layout title={title}>
@@ -36,7 +54,7 @@ const userEmail = Astro.cookies.get("userEmail")?.value || "user@example.com";
 							<li><a href="/learn" class="px-3 py-1 rounded-md flex items-center text-zinc-900 dark:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors">Nauka</a></li>
 							<li><a href="/profile" class="font-semibold text-primary bg-primary/10 px-3 py-1 rounded-md flex items-center gap-1 hover:bg-primary/20 transition-colors">
 								<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user"><circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 0 0-16 0"/></svg>
-								{userEmail}
+								<span id="user-email">{userEmail || "Profil użytkownika"}</span>
 							</a></li>
 						</ul>
 					</nav>
@@ -120,6 +138,15 @@ const userEmail = Astro.cookies.get("userEmail")?.value || "user@example.com";
 		
 		if (themeToggleButton && typeof toggleFn === 'function') {
 			themeToggleButton.addEventListener('click', toggleFn);
+		}
+
+		// Jeśli email nie został ustawiony po stronie serwera, spróbuj pobrać go z localStorage
+		const userEmailElement = document.getElementById('user-email');
+		if (userEmailElement && userEmailElement.textContent === "Profil użytkownika") {
+			const storedUserEmail = localStorage.getItem('user_email');
+			if (storedUserEmail) {
+				userEmailElement.textContent = storedUserEmail;
+			}
 		}
 
 		// Obsługa wylogowania
