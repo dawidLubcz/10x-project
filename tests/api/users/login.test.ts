@@ -1,0 +1,121 @@
+// @vitest-environment node
+// Use Node environment for API tests to avoid JSDOM TextEncoder bug
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { POST } from '@/pages/api/users/login';
+import { createAuthService } from '@/lib/services/auth.service';
+import type { APIContext } from 'astro';
+import type { LoginResponseDto } from '@/types';
+
+// Mock the auth service factory
+vi.mock('@/lib/services/auth.service', () => ({
+  createAuthService: vi.fn()
+}));
+
+// Helper: build minimal APIContext for handler
+function buildContext(request: any, supabaseClient?: any): APIContext {
+  return {
+    request,
+    locals: { supabase: supabaseClient },
+    // other context props not used by POST
+  } as unknown as APIContext;
+}
+
+// Helper: create a fake Request with JSON body
+function makeRequest(body: unknown): Request {
+  return new Request('http://localhost/api/users/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  });
+}
+
+describe('POST /api/users/login', () => {
+  let mockLogin: ReturnType<typeof vi.fn>;
+  const fakeSupabase = {};
+
+  beforeEach(() => {
+    mockLogin = vi.fn();
+    // stub createAuthService to return object with login
+    (createAuthService as any).mockReturnValue({ login: mockLogin });
+  });
+
+  it('returns 500 when supabase client is missing', async () => {
+    const req = makeRequest({ email: 'a@b.com', password: 'pass123' });
+    const res = await POST(buildContext(req, undefined));
+    expect(res.status).toBe(500);
+    const json = await res.json();
+    expect(json).toEqual({ message: 'Błąd serwera: brak połączenia z bazą danych' });
+  });
+
+  it('returns 400 when request JSON is invalid', async () => {
+    const badReq = { json: () => { throw new Error('bad'); } } as any;
+    const res = await POST(buildContext(badReq, fakeSupabase));
+    expect(res.status).toBe(400);
+    const json = await res.json();
+    expect(json).toEqual({ message: 'Nieprawidłowe dane wejściowe' });
+  });
+
+  it('returns 400 on validation error (missing fields)', async () => {
+    const req = makeRequest({});
+    const res = await POST(buildContext(req, fakeSupabase));
+    expect(res.status).toBe(400);
+    const json = await res.json();
+    // message and errors array
+    expect(json).toHaveProperty('message', 'Błąd walidacji danych');
+    expect(Array.isArray(json.errors)).toBe(true);
+    // ensure at least email and password errors present
+    const paths = json.errors.map((e: any) => e.path);
+    expect(paths).toContain('email');
+    expect(paths).toContain('password');
+  });
+
+  it('returns 200 and payload on successful login', async () => {
+    const result: LoginResponseDto = { token: 'tk', user: { id: '1', email: 'a@b.com', created_at: '2023-01-01T00:00:00Z' } };
+    mockLogin.mockResolvedValue(result);
+    const req = makeRequest({ email: 'a@b.com', password: 'pass123' });
+    const res = await POST(buildContext(req, fakeSupabase));
+    expect(res.status).toBe(200);
+    const json = await res.json();
+    expect(json).toEqual(result);
+  });
+
+  it('returns 401 on invalid credentials error', async () => {
+    mockLogin.mockRejectedValue(new Error('Nieprawidłowy email lub hasło'));
+    const req = makeRequest({ email: 'a@b.com', password: 'wrong' });
+    const res = await POST(buildContext(req, fakeSupabase));
+    expect(res.status).toBe(401);
+    const json = await res.json();
+    expect(json).toEqual({ message: 'Nieprawidłowy email lub hasło' });
+  });
+
+  it('returns 401 on unconfirmed account', async () => {
+    mockLogin.mockRejectedValue(new Error('Konto nie zostało potwierdzone. Sprawdź swój email'));
+    const req = makeRequest({ email: 'a@b.com', password: 'pass123' });
+    const res = await POST(buildContext(req, fakeSupabase));
+    expect(res.status).toBe(401);
+    const json = await res.json();
+    expect(json).toEqual({ message: 'Konto nie zostało potwierdzone. Sprawdź swój email' });
+  });
+
+  it('returns 500 on other auth errors', async () => {
+    mockLogin.mockRejectedValue(new Error('Service down'));
+    const req = makeRequest({ email: 'a@b.com', password: 'pass123' });
+    const res = await POST(buildContext(req, fakeSupabase));
+    expect(res.status).toBe(500);
+    const json = await res.json();
+    expect(json).toEqual({ message: 'Service down' });
+  });
+
+  it('returns 500 on unexpected exception', async () => {
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    // cause unexpected: throw inside createAuthService
+    (createAuthService as any).mockImplementation(() => { throw new Error('fail'); });
+    const req = makeRequest({ email: 'a@b.com', password: 'pass123' });
+    const res = await POST(buildContext(req, fakeSupabase));
+    expect(res.status).toBe(500);
+    const json = await res.json();
+    expect(json).toEqual({ message: 'Wystąpił nieoczekiwany błąd' });
+    expect(errorSpy).toHaveBeenCalledWith('Unexpected error during login:', expect.any(Error));
+    errorSpy.mockRestore();
+  });
+}); 

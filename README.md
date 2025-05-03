@@ -8,6 +8,7 @@
 - [Getting Started](#getting-started)
 - [Available Scripts](#available-scripts)
 - [Project Scope](#project-scope)
+- [Testing](#testing)
 - [Project Status](#project-status)
 - [License](#license)
 
@@ -45,6 +46,12 @@
 - [Openrouter.ai](https://openrouter.ai/) for communication with AI models:
   - Access to a wide range of models (OpenAI, Anthropic, Google, etc.)
   - Financial limits on API keys
+
+### Testing
+- [Vitest](https://vitest.dev/) for unit and integration testing
+- [React Testing Library](https://testing-library.com/docs/react-testing-library/intro/) for React components testing
+- [Playwright](https://playwright.dev/) for end-to-end testing
+- [MSW](https://mswjs.io/) (Mock Service Worker) for API mocking
 
 ### CI/CD & Hosting
 - GitHub Actions for CI/CD pipelines
@@ -86,6 +93,8 @@ npm run dev
 - `npm run lint` - Lint the codebase using ESLint
 - `npm run lint:fix` - Lint and fix issues automatically
 - `npm run format` - Format code using Prettier
+- `npm run test` - Run unit tests with Vitest
+- `npm run test:e2e` - Run end-to-end tests with Playwright
 
 ## Project Scope
 
@@ -101,6 +110,22 @@ npm run dev
 - Maximum 100 characters for input text
 - Maximum 1000 characters per flashcard
 - Data stored in Supabase (user accounts and flashcards)
+
+## Testing
+
+### Testing Strategy
+The project implements a comprehensive testing approach including:
+
+- **Unit Tests**: Verifying the correctness of individual components, functions, and classes using Vitest and React Testing Library
+- **Integration Tests**: Checking interactions between different modules of the application
+- **API Tests**: Validating endpoints and their responses
+- **E2E Tests**: Testing complete user flows from end to end with Playwright
+- **UI/UX Tests**: Ensuring proper functioning of the user interface and user experience
+
+### Running Tests
+- Run unit tests: `npm run test`
+- Run end-to-end tests: `npm run test:e2e`
+- Check test coverage: `npm run test:coverage`
 
 ## Project Status
 
