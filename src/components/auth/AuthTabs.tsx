@@ -32,14 +32,14 @@ export function AuthTabs({ defaultTab = "login" }: AuthTabsProps) {
   };
   
   return (
-    <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full" data-test-id="auth-tabs">
-      <TabsList className="grid w-full grid-cols-2" data-test-id="auth-tabs-list">
-        <TabsTrigger value="login" data-test-id="login-tab-trigger">Logowanie</TabsTrigger>
-        <TabsTrigger value="register" data-test-id="register-tab-trigger">Rejestracja</TabsTrigger>
+    <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full" data-testid="auth-tabs">
+      <TabsList className="grid w-full grid-cols-2" data-testid="auth-tabs-list">
+        <TabsTrigger value="login" data-testid="login-tab-trigger">Logowanie</TabsTrigger>
+        <TabsTrigger value="register" data-testid="register-tab-trigger">Rejestracja</TabsTrigger>
       </TabsList>
       
       {registrationSuccess && (
-        <Alert className="mt-4 bg-green-50 border-green-200 dark:bg-green-900/20 dark:border-green-900" data-test-id="registration-success-alert">
+        <Alert className="mt-4 bg-green-50 border-green-200 dark:bg-green-900/20 dark:border-green-900" data-testid="registration-success-alert">
           <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
           <AlertTitle className="text-green-800 dark:text-green-300">Rejestracja zakończona pomyślnie!</AlertTitle>
           <AlertDescription className="text-green-700 dark:text-green-400">
@@ -48,10 +48,10 @@ export function AuthTabs({ defaultTab = "login" }: AuthTabsProps) {
         </Alert>
       )}
       
-      <TabsContent value="login" className="mt-4" data-test-id="login-tab-content">
+      <TabsContent value="login" className="mt-4" data-testid="login-tab-content">
         <LoginForm onSuccess={handleLoginSuccess} />
       </TabsContent>
-      <TabsContent value="register" className="mt-4" data-test-id="register-tab-content">
+      <TabsContent value="register" className="mt-4" data-testid="register-tab-content">
         <RegisterForm onSuccess={handleRegistrationSuccess} />
       </TabsContent>
     </Tabs>

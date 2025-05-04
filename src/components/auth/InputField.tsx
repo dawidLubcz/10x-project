@@ -2,6 +2,7 @@ import React from 'react';
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import type { InputFieldProps } from './types';
+import { cn } from "@/lib/utils";
 
 export function InputField({
   id,
@@ -15,12 +16,12 @@ export function InputField({
   required = false,
   onChange,
   onBlur,
-  'data-test-id': dataTestId
+  'data-testid': dataTestId
 }: InputFieldProps) {
   return (
     <div className="space-y-2">
       <div className="flex justify-between">
-        <Label htmlFor={id} className="text-sm font-medium">
+        <Label htmlFor={id} className={cn(error && "text-destructive")}>
           {label}
           {required && <span className="text-destructive ml-1">*</span>}
         </Label>
@@ -38,10 +39,10 @@ export function InputField({
         required={required}
         onChange={onChange}
         onBlur={onBlur}
-        className={error ? "border-destructive focus-visible:ring-destructive" : ""}
+        className={cn(error && "border-destructive")}
         aria-invalid={!!error}
         aria-describedby={error ? `${id}-error` : undefined}
-        data-test-id={dataTestId}
+        data-testid={dataTestId}
       />
     </div>
   );

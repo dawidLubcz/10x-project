@@ -12,14 +12,14 @@ const pageTitle = isRegister ? "Rejestracja | 10xProject" : "Logowanie | 10xProj
 
 <AuthLayout title={pageTitle}>
   <div class="w-full max-w-md mx-auto">
-    <Card client:load>
+    <Card>
       <CardHeader>
         <CardTitle className="text-center">
           {isRegister ? "Utwórz nowe konto" : "Zaloguj się do konta"}
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <AuthTabs client:load defaultTab={isRegister ? "register" : "login"} />
+        <AuthTabs client:only="react" defaultTab={isRegister ? "register" : "login"} />
       </CardContent>
     </Card>
     <div class="mt-6 text-center text-sm text-muted-foreground">

@@ -2,22 +2,14 @@ export interface AuthTabsProps {
   defaultTab?: "login" | "register";
 }
 
-export interface InputFieldProps {
+export interface InputFieldProps extends React.InputHTMLAttributes<HTMLInputElement> {
   id: string;
-  name: string;
-  type: string;
-  value: string;
   label: string;
-  placeholder?: string;
   error?: string;
-  disabled?: boolean;
-  required?: boolean;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onBlur?: () => void;
-  'data-test-id'?: string;
+  'data-testid'?: string;
 }
 
-export interface PasswordInputProps extends Omit<InputFieldProps, 'type'> {
+export interface PasswordInputProps extends InputFieldProps {
   showStrengthIndicator?: boolean;
 }
 
@@ -34,19 +26,7 @@ export interface LoginFormState {
   password: string;
   isLoading: boolean;
   error: string | null;
-  validationErrors: {
-    email?: string;
-    password?: string;
-  };
+  validationErrors: Record<string, string>;
 }
 
-export interface RegisterFormState {
-  email: string;
-  password: string;
-  isLoading: boolean;
-  error: string | null;
-  validationErrors: {
-    email?: string;
-    password?: string;
-  };
-} 
+export interface RegisterFormState extends LoginFormState {} 

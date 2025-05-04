@@ -74,7 +74,7 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
   };
   
   return (
-    <form onSubmit={handleFormSubmit} className="space-y-4" data-test-id="register-form">
+    <form onSubmit={handleFormSubmit} className="space-y-4" data-testid="register-form">
       <FormErrorMessage error={authError} />
       
       <InputField
@@ -87,7 +87,7 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
         error={errors.email}
         required
         onChange={handleChange}
-        data-test-id="register-email-input"
+        data-testid="register-email-input"
       />
       
       <PasswordInput
@@ -100,7 +100,7 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
         required
         showStrengthIndicator={true}
         onChange={handleChange}
-        data-test-id="register-password-input"
+        data-testid="register-password-input"
       />
       
       <div className="text-sm text-muted-foreground">
@@ -111,7 +111,7 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
         type="submit" 
         className="w-full" 
         disabled={isSubmitting || loading}
-        data-test-id="register-submit-button"
+        data-testid="register-submit-button"
       >
         {isSubmitting || loading ? 'Rejestracja...' : 'Zarejestruj się'}
       </Button>
