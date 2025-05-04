@@ -14,7 +14,8 @@ export function InputField({
   disabled = false,
   required = false,
   onChange,
-  onBlur
+  onBlur,
+  'data-test-id': dataTestId
 }: InputFieldProps) {
   return (
     <div className="space-y-2">
@@ -40,6 +41,7 @@ export function InputField({
         className={error ? "border-destructive focus-visible:ring-destructive" : ""}
         aria-invalid={!!error}
         aria-describedby={error ? `${id}-error` : undefined}
+        data-test-id={dataTestId}
       />
     </div>
   );

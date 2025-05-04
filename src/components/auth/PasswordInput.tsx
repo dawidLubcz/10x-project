@@ -16,7 +16,8 @@ export function PasswordInput({
   required = false,
   showStrengthIndicator = false,
   onChange,
-  onBlur
+  onBlur,
+  'data-test-id': dataTestId
 }: PasswordInputProps) {
   const [showPassword, setShowPassword] = useState(false);
   
@@ -39,6 +40,7 @@ export function PasswordInput({
           required={required}
           onChange={onChange}
           onBlur={onBlur}
+          data-test-id={dataTestId}
         />
         <Button
           type="button"
@@ -48,6 +50,7 @@ export function PasswordInput({
           onClick={togglePasswordVisibility}
           tabIndex={-1}
           aria-label={showPassword ? 'Ukryj hasło' : 'Pokaż hasło'}
+          data-test-id={`${dataTestId}-toggle`}
         >
           {showPassword ? (
             <EyeOffIcon className="h-4 w-4" />

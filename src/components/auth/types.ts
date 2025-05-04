@@ -14,6 +14,7 @@ export interface InputFieldProps {
   required?: boolean;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onBlur?: () => void;
+  'data-test-id'?: string;
 }
 
 export interface PasswordInputProps extends Omit<InputFieldProps, 'type'> {

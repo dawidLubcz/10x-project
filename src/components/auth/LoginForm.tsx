@@ -85,7 +85,7 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
   };
   
   return (
-    <form onSubmit={handleFormSubmit} className="space-y-4">
+    <form onSubmit={handleFormSubmit} className="space-y-4" data-test-id="login-form">
       <FormErrorMessage error={authError} />
       
       <InputField
@@ -98,6 +98,7 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
         error={errors.email}
         required
         onChange={handleChange}
+        data-test-id="login-email-input"
       />
       
       <PasswordInput
@@ -109,12 +110,14 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
         error={errors.password}
         required
         onChange={handleChange}
+        data-test-id="login-password-input"
       />
       
       <Button 
         type="submit" 
         className="w-full" 
         disabled={isSubmitting || loading}
+        data-test-id="login-submit-button"
       >
         {isSubmitting || loading ? 'Logowanie...' : 'Zaloguj się'}
       </Button>
