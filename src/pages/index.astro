@@ -3,6 +3,7 @@ import Layout from "../layouts/Layout.astro";
 import StatisticsCard from "../components/dashboard/StatisticsCard";
 import ActionCardGrid from "../components/dashboard/ActionCardGrid";
 import QuickCreateForm from "../components/dashboard/QuickCreateForm";
+import ThemeToggle from "../components/ThemeToggle";
 
 // Sprawdzenie autoryzacji
 const authToken = Astro.cookies.get("auth_token")?.value;
@@ -67,9 +68,7 @@ try {
 						<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-log-out"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
 						Wyloguj
 					</a>
-					<button id="theme-toggle" class="p-2 rounded-full bg-zinc-200 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 hover:bg-zinc-300 dark:hover:bg-zinc-700 transition-colors">
-						<span class="theme-toggle-icon inline-block w-5 h-5"></span>
-					</button>
+					<ThemeToggle client:load />
 				</div>
 			</div>
 		</header>
@@ -139,14 +138,6 @@ try {
 <script>
 	// Inicjalizacja przycisku po załadowaniu strony
 	document.addEventListener('DOMContentLoaded', () => {
-		const themeToggleButton = document.getElementById('theme-toggle');
-		// Używamy as any, aby TypeScript nie zgłaszał błędu
-		const toggleFn = (window as any).toggleTheme;
-		
-		if (themeToggleButton && typeof toggleFn === 'function') {
-			themeToggleButton.addEventListener('click', toggleFn);
-		}
-
 		// Jeśli email nie został ustawiony po stronie serwera, spróbuj pobrać go z localStorage
 		const userEmailElement = document.getElementById('user-email');
 		if (userEmailElement && userEmailElement.textContent === "Profil użytkownika") {

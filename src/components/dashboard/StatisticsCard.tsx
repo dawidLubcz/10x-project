@@ -11,11 +11,11 @@ const StatisticItem: React.FC<{
   loading: boolean;
 }> = ({ label, value, loading }) => (
   <div className="space-y-1">
-    <p className="text-sm text-muted-foreground">{label}</p>
+    <p className="text-sm text-muted-foreground dark:text-zinc-400">{label}</p>
     {loading ? (
       <Skeleton className="h-8 w-16" />
     ) : (
-      <p className="text-2xl font-bold text-foreground">{value}</p>
+      <p className="text-2xl font-bold text-foreground dark:text-zinc-100">{value}</p>
     )}
   </div>
 );
@@ -24,9 +24,9 @@ const StatisticsCard: React.FC = () => {
   const { statistics, loading, error, refreshStatistics } = useFlashcardStatistics();
 
   return (
-    <Card className="bg-card border-zinc-200 dark:border-zinc-800">
-      <CardHeader className="bg-card flex flex-row items-center justify-between">
-        <CardTitle className="text-xl text-card-foreground">Twoje statystyki</CardTitle>
+    <Card className="border-zinc-200 dark:border-zinc-700">
+      <CardHeader className="flex flex-row items-center justify-between">
+        <CardTitle className="dark:text-zinc-100">Twoje statystyki</CardTitle>
         <Button 
           variant="outline" 
           size="sm" 
@@ -38,14 +38,14 @@ const StatisticsCard: React.FC = () => {
           <span>Odśwież</span>
         </Button>
       </CardHeader>
-      <CardContent className="bg-card">
+      <CardContent>
         {error ? (
-          <div className="flex items-center space-x-2 text-destructive p-4 rounded-md bg-destructive/10">
+          <div className="flex items-center space-x-2 text-destructive p-4 rounded-md bg-destructive/10 dark:bg-red-900/20 dark:text-red-300">
             <AlertCircle className="h-5 w-5" />
             <p>Wystąpił błąd podczas pobierania statystyk</p>
             <button 
               onClick={refreshStatistics}
-              className="text-sm underline ml-2"
+              className="text-sm underline ml-2 dark:text-red-300"
             >
               Odśwież
             </button>

@@ -29,15 +29,6 @@ const { title } = Astro.props;
 			
 			window.localStorage.setItem('theme', theme);
 			
-			// Funkcja do przełączania motywu - dostępna globalnie
-			window.toggleTheme = function() {
-				const currentTheme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
-				const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-				
-				document.documentElement.classList.toggle('dark', newTheme === 'dark');
-				localStorage.setItem('theme', newTheme);
-			}
-			
 			// Nasłuchuje zmian preferencji systemowych
 			window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', ({matches}) => {
 				const newTheme = matches ? 'dark' : 'light';

@@ -1,4 +1,5 @@
 import * as React from "react"
+import { cn } from "@/lib/utils"
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: "primary" | "secondary" | "destructive" | "outline" | "ghost" | "link";
@@ -13,11 +14,11 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     // Variant styles
     const variantStyles = {
       primary: "bg-primary text-primary-foreground hover:bg-primary/90",
-      secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80",
+      secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80 dark:text-white",
       destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/90",
-      outline: "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
-      ghost: "hover:bg-accent hover:text-accent-foreground",
-      link: "text-primary underline-offset-4 hover:underline"
+      outline: "border border-input bg-background hover:bg-accent hover:text-accent-foreground dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 dark:hover:bg-zinc-700",
+      ghost: "hover:bg-accent hover:text-accent-foreground dark:hover:bg-zinc-800 dark:text-zinc-100",
+      link: "text-primary underline-offset-4 hover:underline dark:text-blue-400"
     };
     
     // Size styles
@@ -30,7 +31,12 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     
     return (
       <button
-        className={`${baseStyles} ${variantStyles[variant]} ${sizeStyles[size]} ${className}`}
+        className={cn(
+          baseStyles,
+          variantStyles[variant],
+          sizeStyles[size],
+          className
+        )}
         ref={ref}
         {...props}
       />

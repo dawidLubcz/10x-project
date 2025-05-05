@@ -13,7 +13,7 @@ const ActionCard: React.FC<ActionCardProps> = ({
   tooltip
 }) => {
   const variantClasses = {
-    default: "border-zinc-200 dark:border-zinc-800 hover:border-primary/40",
+    default: "border-zinc-200 dark:border-zinc-700 hover:border-primary/40",
     primary: "border-primary/40 hover:border-primary",
     secondary: "border-secondary/40 hover:border-secondary"
   };
@@ -24,8 +24,8 @@ const ActionCard: React.FC<ActionCardProps> = ({
         variant === 'primary' 
           ? 'bg-primary text-primary-foreground' 
           : variant === 'secondary'
-            ? 'bg-secondary text-secondary-foreground'
-            : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100'
+            ? 'bg-secondary text-secondary-foreground dark:text-white'
+            : 'bg-zinc-100 dark:bg-zinc-700 text-zinc-900 dark:text-zinc-100'
       }`}>
         <span className="w-6 h-6 flex items-center justify-center font-bold">{icon.charAt(0).toUpperCase()}</span>
       </div>
@@ -33,7 +33,7 @@ const ActionCard: React.FC<ActionCardProps> = ({
   };
 
   const cardClassName = `flex flex-col h-full transition-all ${
-    disabled ? "opacity-60 cursor-not-allowed" : "hover:shadow-md"
+    disabled ? "opacity-80 cursor-not-allowed" : "hover:shadow-md"
   } ${variantClasses[variant]}`;
 
   const renderButton = () => {
@@ -44,7 +44,7 @@ const ActionCard: React.FC<ActionCardProps> = ({
         <div className="relative group">
           <Button 
             variant={buttonVariant} 
-            className="w-full cursor-not-allowed opacity-70" 
+            className="w-full cursor-not-allowed opacity-70 dark:text-zinc-300 dark:bg-zinc-800 dark:border-zinc-700" 
             disabled={true}
           >
             Przejdź
@@ -63,7 +63,7 @@ const ActionCard: React.FC<ActionCardProps> = ({
         <div className="relative group w-full">
           <Button 
             variant={buttonVariant} 
-            className="w-full cursor-not-allowed opacity-70"
+            className="w-full cursor-not-allowed opacity-70 dark:text-zinc-300 dark:bg-zinc-800 dark:border-zinc-700"
             disabled
           >
             Niedostępne
@@ -80,7 +80,7 @@ const ActionCard: React.FC<ActionCardProps> = ({
         <a href={linkTo} className="w-full inline-block">
           <Button 
             variant={buttonVariant} 
-            className="w-full"
+            className={`w-full ${variant === 'default' ? 'dark:bg-zinc-800 dark:text-zinc-200 dark:border-zinc-700 dark:hover:bg-zinc-700' : ''}`}
           >
             Przejdź
           </Button>
@@ -91,17 +91,17 @@ const ActionCard: React.FC<ActionCardProps> = ({
 
   return (
     <Card className={cardClassName}>
-      <CardHeader className="bg-card text-card-foreground">
+      <CardHeader>
         <div className="flex items-center space-x-2">
           {getIconElement()}
-          <CardTitle className="text-xl text-foreground">{title}</CardTitle>
+          <CardTitle>{title}</CardTitle>
         </div>
-        <CardDescription className="text-muted-foreground">{description}</CardDescription>
+        <CardDescription>{description}</CardDescription>
       </CardHeader>
       <CardContent className="flex-grow">
         {/* Możliwa dodatkowa zawartość */}
       </CardContent>
-      <CardFooter className="bg-card">
+      <CardFooter>
         {renderButton()}
       </CardFooter>
     </Card>

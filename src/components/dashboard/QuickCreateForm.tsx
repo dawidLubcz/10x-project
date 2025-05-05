@@ -49,11 +49,11 @@ const QuickCreateForm: React.FC = () => {
   };
 
   return (
-    <Card className="relative bg-card border-zinc-200 dark:border-zinc-800">
-      <CardHeader className="bg-card">
-        <CardTitle className="text-xl text-card-foreground">Szybka fiszka</CardTitle>
+    <Card>
+      <CardHeader>
+        <CardTitle>Szybka fiszka</CardTitle>
       </CardHeader>
-      <CardContent className="bg-card">
+      <CardContent>
         {error && formSubmitted && (
           <Alert variant="destructive" className="mb-4">
             <AlertTriangle className="h-4 w-4" />
@@ -77,13 +77,13 @@ const QuickCreateForm: React.FC = () => {
               name="front"
               render={({ field }: { field: Record<string, any> }) => (
                 <FormItem>
-                  <FormLabel className="text-card-foreground">Pytanie (front)</FormLabel>
+                  <FormLabel className="text-foreground dark:text-zinc-200">Pytanie (front)</FormLabel>
                   <FormControl>
                     <Input
                       placeholder="Np. Co to jest astrofizyka?"
                       {...field}
                       disabled={loading}
-                      className="bg-background text-foreground border-zinc-300 dark:border-zinc-700"
+                      className="bg-white dark:bg-zinc-800 text-foreground dark:text-zinc-100 border-zinc-300 dark:border-zinc-600 dark:focus:border-zinc-500"
                     />
                   </FormControl>
                   <FormMessage />
@@ -96,12 +96,12 @@ const QuickCreateForm: React.FC = () => {
               name="back"
               render={({ field }: { field: Record<string, any> }) => (
                 <FormItem>
-                  <FormLabel className="text-card-foreground">Odpowiedź (back)</FormLabel>
+                  <FormLabel className="text-foreground dark:text-zinc-200">Odpowiedź (back)</FormLabel>
                   <FormControl>
                     <Textarea
                       placeholder="Np. Astrofizyka to dział astronomii i fizyki badający właściwości fizyczne ciał niebieskich oraz zjawiska zachodzące we wszechświecie."
                       {...field}
-                      className="min-h-[100px] bg-background text-foreground border-zinc-300 dark:border-zinc-700"
+                      className="min-h-[100px] bg-white dark:bg-zinc-800 text-foreground dark:text-zinc-100 border-zinc-300 dark:border-zinc-600 dark:focus:border-zinc-500"
                       disabled={loading}
                     />
                   </FormControl>

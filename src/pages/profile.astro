@@ -4,6 +4,7 @@ import UserInfoContainer from '../components/profile/UserInfoContainer';
 import ChangePasswordForm from '../components/profile/ChangePasswordForm';
 import DeleteAccountSection from '../components/profile/DeleteAccountSection';
 import LogoutButton from '../components/profile/LogoutButton';
+import ThemeToggle from '../components/ThemeToggle';
 import { useProfile } from '../lib/hooks/useProfile';
 
 // Tytuł strony
@@ -21,13 +22,16 @@ const title = "Profil użytkownika - 10xProject";
 							<li><a href="/" class="text-zinc-900 dark:text-zinc-100 hover:text-primary transition-colors">Dashboard</a></li>
 							<li><a href="/flashcards" class="text-zinc-900 dark:text-zinc-100 hover:text-primary transition-colors">Fiszki</a></li>
 							<li><a href="/generate" class="text-zinc-900 dark:text-zinc-100 hover:text-primary transition-colors">Generator AI</a></li>
-							<li><a href="/learn" class="text-zinc-900 dark:text-zinc-100 hover:text-primary transition-colors">Nauka</a></li>
+							<li><span class="text-zinc-500 dark:text-zinc-500 cursor-not-allowed relative group">
+								Nauka
+								<span class="absolute left-1/2 -translate-x-1/2 top-full mt-2 px-2 py-1 bg-black/80 text-white text-xs rounded opacity-0 group-hover:opacity-100 whitespace-nowrap transition-opacity pointer-events-none z-10">
+									Funkcjonalność niedostępna w MVP
+								</span>
+							</span></li>
 							<li><a href="/profile" class="text-zinc-900 dark:text-zinc-100 hover:text-primary transition-colors">Profil</a></li>
 						</ul>
 					</nav>
-					<button id="theme-toggle" class="p-2 rounded-full bg-zinc-200 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 hover:bg-zinc-300 dark:hover:bg-zinc-700 transition-colors">
-						<span class="theme-toggle-icon inline-block w-5 h-5"></span>
-					</button>
+					<ThemeToggle client:load />
 				</div>
 			</div>
 		</header>
@@ -72,14 +76,6 @@ const title = "Profil użytkownika - 10xProject";
 		if (!token) {
 			// Przekierowanie do strony logowania
 			window.location.href = '/auth?redirect=/profile';
-		}
-		
-		// Inicjalizacja przycisku motywu
-		const themeToggleButton = document.getElementById('theme-toggle');
-		const toggleFn = (window as any).toggleTheme;
-		
-		if (themeToggleButton && typeof toggleFn === 'function') {
-			themeToggleButton.addEventListener('click', toggleFn);
 		}
 	});
 </script> 
