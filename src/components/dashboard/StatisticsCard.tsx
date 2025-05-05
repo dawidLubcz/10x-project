@@ -13,9 +13,9 @@ const StatisticItem: React.FC<{
   <div className="space-y-1">
     <p className="text-sm text-muted-foreground dark:text-zinc-400">{label}</p>
     {loading ? (
-      <Skeleton className="h-8 w-16" />
+      <Skeleton className="h-8 w-16 dark:bg-zinc-700" />
     ) : (
-      <p className="text-2xl font-bold text-foreground dark:text-zinc-100">{value}</p>
+      <p className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">{value}</p>
     )}
   </div>
 );
@@ -24,15 +24,15 @@ const StatisticsCard: React.FC = () => {
   const { statistics, loading, error, refreshStatistics } = useFlashcardStatistics();
 
   return (
-    <Card className="border-zinc-200 dark:border-zinc-700">
+    <Card className="border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800">
       <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle className="dark:text-zinc-100">Twoje statystyki</CardTitle>
+        <CardTitle className="text-zinc-900 dark:text-zinc-100">Twoje statystyki</CardTitle>
         <Button 
           variant="outline" 
           size="sm" 
           onClick={refreshStatistics}
           disabled={loading}
-          className="h-8 px-2 flex items-center gap-1"
+          className="h-8 px-2 flex items-center gap-1 border-zinc-300 dark:border-zinc-600 dark:text-zinc-300 dark:bg-zinc-800 dark:hover:bg-zinc-700"
         >
           <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
           <span>Odśwież</span>

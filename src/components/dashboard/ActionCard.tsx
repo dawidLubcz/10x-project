@@ -13,9 +13,9 @@ const ActionCard: React.FC<ActionCardProps> = ({
   tooltip
 }) => {
   const variantClasses = {
-    default: "border-zinc-200 dark:border-zinc-700 hover:border-primary/40",
-    primary: "border-primary/40 hover:border-primary",
-    secondary: "border-secondary/40 hover:border-secondary"
+    default: "bg-white border-zinc-200 dark:bg-zinc-800 dark:border-zinc-700 hover:border-primary/40",
+    primary: "bg-white border-primary/40 dark:bg-zinc-800 dark:border-primary/60 hover:border-primary",
+    secondary: "bg-white border-secondary/40 dark:bg-zinc-800 dark:border-secondary/60 hover:border-secondary"
   };
 
   const getIconElement = () => {
@@ -44,7 +44,7 @@ const ActionCard: React.FC<ActionCardProps> = ({
         <div className="relative group">
           <Button 
             variant={buttonVariant} 
-            className="w-full cursor-not-allowed opacity-70 dark:text-zinc-300 dark:bg-zinc-800 dark:border-zinc-700" 
+            className="w-full cursor-not-allowed opacity-70 dark:border-zinc-700 dark:text-zinc-400 dark:bg-zinc-800" 
             disabled={true}
           >
             Przejdź
@@ -63,7 +63,7 @@ const ActionCard: React.FC<ActionCardProps> = ({
         <div className="relative group w-full">
           <Button 
             variant={buttonVariant} 
-            className="w-full cursor-not-allowed opacity-70 dark:text-zinc-300 dark:bg-zinc-800 dark:border-zinc-700"
+            className="w-full cursor-not-allowed opacity-70 dark:border-zinc-700 dark:text-zinc-400 dark:bg-zinc-800"
             disabled
           >
             Niedostępne
@@ -80,7 +80,7 @@ const ActionCard: React.FC<ActionCardProps> = ({
         <a href={linkTo} className="w-full inline-block">
           <Button 
             variant={buttonVariant} 
-            className={`w-full ${variant === 'default' ? 'dark:bg-zinc-800 dark:text-zinc-200 dark:border-zinc-700 dark:hover:bg-zinc-700' : ''}`}
+            className={`w-full ${variant === 'default' ? 'dark:bg-zinc-800 dark:text-zinc-200 dark:border-zinc-700 dark:hover:bg-zinc-700 dark:hover:text-zinc-100' : variant === 'primary' ? 'dark:text-zinc-900' : 'dark:text-zinc-900'}`}
           >
             Przejdź
           </Button>
@@ -94,9 +94,9 @@ const ActionCard: React.FC<ActionCardProps> = ({
       <CardHeader>
         <div className="flex items-center space-x-2">
           {getIconElement()}
-          <CardTitle>{title}</CardTitle>
+          <CardTitle className="text-zinc-900 dark:text-zinc-100">{title}</CardTitle>
         </div>
-        <CardDescription>{description}</CardDescription>
+        <CardDescription className="dark:text-zinc-400">{description}</CardDescription>
       </CardHeader>
       <CardContent className="flex-grow">
         {/* Możliwa dodatkowa zawartość */}

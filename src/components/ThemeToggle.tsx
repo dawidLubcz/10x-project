@@ -1,18 +1,23 @@
 import * as React from "react";
 import { useEffect, useState } from "react";
+import { Moon, Sun } from "lucide-react";
 
 interface ThemeToggleProps {
   className?: string;
 }
 
 const ThemeToggle: React.FC<ThemeToggleProps> = ({ className = "" }) => {
-  const [theme, setTheme] = useState<"light" | "dark">("light");
+  const [theme, setTheme] = useState<"light" | "dark">("dark");
   
   // Inicjalizacja stanu po zamontowaniu komponentu
   useEffect(() => {
     // Sprawdź bieżący motyw
-    const isDark = document.documentElement.classList.contains("dark");
-    setTheme(isDark ? "dark" : "light");
+    const savedTheme = localStorage.getItem("theme") as "light" | "dark" | null;
+    const systemTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "dark";
+    const currentTheme = savedTheme || systemTheme;
+    
+    setTheme(currentTheme);
+    document.documentElement.classList.toggle("dark", currentTheme === "dark");
   }, []);
   
   const toggleTheme = () => {
@@ -33,7 +38,11 @@ const ThemeToggle: React.FC<ThemeToggleProps> = ({ className = "" }) => {
       className={`p-2 rounded-full bg-zinc-200 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 hover:bg-zinc-300 dark:hover:bg-zinc-700 transition-colors ${className}`}
       aria-label={theme === "dark" ? "Przełącz na tryb jasny" : "Przełącz na tryb ciemny"}
     >
-      <span className="theme-toggle-icon inline-block w-5 h-5"></span>
+      {theme === "dark" ? (
+        <Sun className="h-5 w-5" />
+      ) : (
+        <Moon className="h-5 w-5" />
+      )}
     </button>
   );
 };

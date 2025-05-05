@@ -2,6 +2,31 @@
 import Layout from '../layouts/Layout.astro';
 import { GenerateView } from '../components/GenerateView';
 import ThemeToggle from '../components/ThemeToggle';
+
+// Sprawdzenie autoryzacji
+const authToken = Astro.cookies.get("auth_token")?.value;
+
+// Pobieranie adresu email zalogowanego użytkownika
+let userEmail;
+try {
+  // Pobierz informacje o zalogowanym użytkowniku z API
+  const response = await fetch(`${Astro.url.origin}/api/users/current`, {
+    headers: {
+      "Cookie": `auth_token=${authToken}`
+    }
+  });
+  
+  if (response.ok) {
+    const userData = await response.json();
+    userEmail = userData.email;
+  } else {
+    // Jeśli nie można pobrać danych użytkownika, użyj localStorage po stronie klienta
+    userEmail = null;
+  }
+} catch (error) {
+  console.error("Błąd podczas pobierania danych użytkownika:", error);
+  userEmail = null;
+}
 ---
 
 <Layout title="Generowanie Fiszek - 10xProject">
@@ -11,18 +36,26 @@ import ThemeToggle from '../components/ThemeToggle';
         <a href="/" class="text-2xl font-bold text-primary">10xProject</a>
         <div class="flex items-center">
           <nav class="mr-4">
-            <ul class="flex space-x-4">
-              <li><a href="/" class="text-zinc-900 dark:text-zinc-100 hover:text-primary transition-colors">Dashboard</a></li>
-              <li><a href="/flashcards" class="text-zinc-900 dark:text-zinc-100 hover:text-primary transition-colors">Fiszki</a></li>
-              <li><a href="/generate" class="text-zinc-900 dark:text-zinc-100 hover:text-primary transition-colors">Generator AI</a></li>
-              <li><span class="text-zinc-500 dark:text-zinc-500 cursor-not-allowed relative group">
+            <ul class="flex space-x-4 items-center">
+              <li><a href="/" class="px-3 py-1 rounded-md flex items-center text-zinc-900 dark:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors">Dashboard</a></li>
+              <li><a href="/flashcards" class="px-3 py-1 rounded-md flex items-center text-zinc-900 dark:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors">Fiszki</a></li>
+              <li><a href="/generate" class="px-3 py-1 rounded-md flex items-center text-zinc-900 dark:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors">Generator AI</a></li>
+              <li><span class="px-3 py-1 rounded-md flex items-center text-zinc-500 dark:text-zinc-500 cursor-not-allowed relative group">
                 Nauka
                 <span class="absolute left-1/2 -translate-x-1/2 top-full mt-2 px-2 py-1 bg-black/80 text-white text-xs rounded opacity-0 group-hover:opacity-100 whitespace-nowrap transition-opacity pointer-events-none z-10">
                   Funkcjonalność niedostępna w MVP
                 </span>
               </span></li>
+              <li><a href="/profile" class="font-semibold text-primary bg-primary/10 px-3 py-1 rounded-md flex items-center gap-1 hover:bg-primary/20 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user"><circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 0 0-16 0"/></svg>
+                <span id="user-email">{userEmail || "Profil użytkownika"}</span>
+              </a></li>
             </ul>
           </nav>
+          <a href="javascript:void(0)" id="logout-button" class="font-semibold px-3 py-1 mr-3 rounded-md bg-red-500 hover:bg-red-600 text-white flex items-center gap-1 transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-log-out"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            Wyloguj
+          </a>
           <ThemeToggle client:load />
         </div>
       </div>
@@ -37,7 +70,7 @@ import ThemeToggle from '../components/ThemeToggle';
 
     <footer class="border-t border-zinc-200 dark:border-zinc-800 py-4 bg-zinc-50 dark:bg-zinc-900">
       <div class="container mx-auto px-4 text-center text-sm text-zinc-600 dark:text-zinc-400">
-        &copy; 2023-2024 10xProject. Wszystkie prawa zastrzeżone.
+        &copy; 2025 10xProject. Wszystkie prawa zastrzeżone.
       </div>
     </footer>
   </div>
@@ -46,12 +79,48 @@ import ThemeToggle from '../components/ThemeToggle';
 <script>
   // Inicjalizacja przycisku po załadowaniu strony
   document.addEventListener('DOMContentLoaded', () => {
-    const themeToggleButton = document.getElementById('theme-toggle');
-    // Używamy as any, aby TypeScript nie zgłaszał błędu
-    const toggleFn = (window as any).toggleTheme;
-    
-    if (themeToggleButton && typeof toggleFn === 'function') {
-      themeToggleButton.addEventListener('click', toggleFn);
+    // Jeśli email nie został ustawiony po stronie serwera, spróbuj pobrać go z localStorage
+    const userEmailElement = document.getElementById('user-email');
+    if (userEmailElement && userEmailElement.textContent === "Profil użytkownika") {
+      const storedUserEmail = localStorage.getItem('user_email');
+      if (storedUserEmail) {
+        userEmailElement.textContent = storedUserEmail;
+      }
+    }
+
+    // Obsługa wylogowania
+    const logoutButton = document.getElementById('logout-button');
+    if (logoutButton) {
+      logoutButton.addEventListener('click', async () => {
+        try {
+          const response = await fetch('/api/users/logout', {
+            method: 'POST',
+          });
+          
+          if (!response.ok) {
+            throw new Error('Nie udało się wylogować');
+          }
+          
+          // Czyszczenie localStorage/cookies
+          localStorage.removeItem('auth_token');
+          localStorage.removeItem('user_id');
+          localStorage.removeItem('user_email');
+          
+          // Usuwanie ciasteczka
+          document.cookie = "auth_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Strict";
+          
+          // Przekierowanie do strony logowania
+          window.location.href = '/auth';
+        } catch (error) {
+          console.error('Błąd podczas wylogowywania:', error);
+          // Nawet jeśli wystąpi błąd, próbujemy wylogować lokalnie
+          localStorage.removeItem('auth_token');
+          localStorage.removeItem('user_id');
+          localStorage.removeItem('user_email');
+          document.cookie = "auth_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Strict";
+          window.location.href = '/auth';
+        }
+      });
     }
   });
 </script>

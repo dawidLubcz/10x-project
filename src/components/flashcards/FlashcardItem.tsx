@@ -31,21 +31,26 @@ export const FlashcardItem: React.FC<FlashcardItemProps> = ({
 
   // Funkcja zwracająca skróconą treść, jeśli fiszka nie jest rozwinięta
   const truncateText = (text: string, maxLength: number = 100) => {
-    // Jeśli tekst jest pusty lub fiszka jest rozwinięta, zwróć pełny tekst
     if (!text) return '';
     
-    // W trybie rozwiniętym zwracamy cały tekst
     if (flashcard.isExpanded) {
       return text;
     }
     
-    // W trybie zwiniętym, sprawdzamy czy trzeba skrócić
     if (text.length <= maxLength) {
       return text;
     }
     
-    // Zwróć skróconą wersję
-    return `${text.substring(0, maxLength)}...`;
+    // Zwróć skróconą wersję, zapewniając zakończenie pełnym słowem
+    const truncated = text.substring(0, maxLength);
+    const lastSpaceIndex = truncated.lastIndexOf(' ');
+    
+    // Zakończ na ostatniej pełnej spacji, jeśli taka istnieje
+    if (lastSpaceIndex > maxLength * 0.8) {
+      return `${truncated.substring(0, lastSpaceIndex)}...`;
+    }
+    
+    return `${truncated}...`;
   };
 
   console.log('Flashcard state:', { 
@@ -56,29 +61,29 @@ export const FlashcardItem: React.FC<FlashcardItemProps> = ({
   });
 
   return (
-    <Card className="h-full flex flex-col overflow-hidden">
+    <Card className="h-full flex flex-col overflow-hidden bg-white border-zinc-200 dark:bg-zinc-800 dark:border-zinc-700 hover:shadow-md transition-shadow">
       <CardHeader className="pb-3">
-        <CardTitle className="text-lg font-semibold">
+        <CardTitle className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
           {truncateText(flashcard.front, 50)}
         </CardTitle>
       </CardHeader>
       
-      <CardContent className={`pb-2 flex-grow transition-all duration-200 ${flashcard.isExpanded ? 'max-h-[500px]' : 'max-h-[150px]'} overflow-auto`}>
-        <div className="prose prose-sm max-w-none">
+      <CardContent 
+        className={`pb-2 flex-grow transition-all duration-300 overflow-auto text-zinc-800 dark:text-zinc-200
+          ${flashcard.isExpanded ? 'max-h-[500px]' : 'max-h-[150px]'}`}
+      >
+        <div className="prose prose-sm dark:prose-invert max-w-none">
           <p>{truncateText(flashcard.back, 150)}</p>
         </div>
       </CardContent>
       
-      <CardFooter className="border-t pt-3 flex justify-between items-center">
+      <CardFooter className="border-t border-zinc-200 dark:border-zinc-700 pt-3 flex justify-between items-center bg-zinc-50 dark:bg-zinc-800">
         {shouldShowExpandButton ? (
           <Button 
             variant="ghost" 
             size="sm" 
-            onClick={() => {
-              console.log('Toggle expand button clicked for flashcard ID:', flashcard.id);
-              onToggleExpand();
-            }}
-            className="text-xs"
+            onClick={onToggleExpand}
+            className="text-xs text-zinc-700 hover:bg-zinc-200 dark:text-zinc-300 dark:hover:bg-zinc-700"
           >
             {flashcard.isExpanded ? (
               <>
@@ -88,7 +93,7 @@ export const FlashcardItem: React.FC<FlashcardItemProps> = ({
             ) : (
               <>
                 <ChevronDown className="h-4 w-4 mr-1" />
-                Rozwiń ({isFrontTruncated || isBackTruncated ? 'pokaż więcej' : ''})
+                Rozwiń
               </>
             )}
           </Button>
@@ -100,7 +105,7 @@ export const FlashcardItem: React.FC<FlashcardItemProps> = ({
           <Button 
             variant="outline" 
             size="icon" 
-            className="h-8 w-8" 
+            className="h-8 w-8 border-zinc-300 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-700" 
             onClick={onEdit}
             title="Edytuj fiszkę"
           >
@@ -111,7 +116,7 @@ export const FlashcardItem: React.FC<FlashcardItemProps> = ({
           <Button 
             variant="outline" 
             size="icon" 
-            className="h-8 w-8 text-destructive hover:bg-destructive/10" 
+            className="h-8 w-8 text-destructive hover:bg-destructive/10 border-zinc-300 dark:border-zinc-700 dark:hover:bg-red-950/30" 
             onClick={onDelete}
             title="Usuń fiszkę"
           >
