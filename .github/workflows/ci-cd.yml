@@ -1,0 +1,106 @@
+name: 10xProject CI/CD
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:  # Enables manual triggering
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Run linting
+        run: npm run lint || true  # Continue on lint errors but report them
+        
+      - name: Run unit and integration tests
+        run: npm run test
+        
+      - name: Run E2E tests
+        run: npm run test:e2e
+        
+      - name: Run accessibility tests
+        run: npm run test:a11y || true  # Run a11y tests if configured
+      
+  build:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Build production
+        run: npm run build
+        
+      - name: Check build output
+        run: ls -la dist/
+        
+#      - name: Upload build artifacts
+#        uses: actions/upload-artifact@v4
+#        with:
+#          name: production-build
+#          path: dist/
+#          retention-days: 1
+  
+  # Uncomment and configure when ready for deployment
+  # deploy:
+  #   needs: build
+  #   if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     
+  #     - name: Download build artifacts
+  #       uses: actions/download-artifact@v4
+  #       with:
+  #         name: production-build
+  #         path: dist/
+  #         
+  #     - name: Set up Docker Buildx
+  #       uses: docker/setup-buildx-action@v3
+  #       
+  #     - name: Login to DigitalOcean Container Registry
+  #       uses: docker/login-action@v3
+  #       with:
+  #         registry: registry.digitalocean.com
+  #         username: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+  #         password: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+  #         
+  #     - name: Build and push Docker image
+  #       uses: docker/build-push-action@v5
+  #       with:
+  #         context: .
+  #         push: true
+  #         tags: registry.digitalocean.com/${{ secrets.DIGITALOCEAN_REGISTRY }}/10xproject:latest,registry.digitalocean.com/${{ secrets.DIGITALOCEAN_REGISTRY }}/10xproject:${{ github.sha }}
+  #         
+  #     - name: Deploy to DigitalOcean Droplet
+  #       uses: appleboy/ssh-action@master
+  #       with:
+  #         host: ${{ secrets.DIGITALOCEAN_HOST }}
+  #         username: ${{ secrets.DIGITALOCEAN_USERNAME }}
+  #         key: ${{ secrets.DIGITALOCEAN_SSH_KEY }}
+  #         script: |
+  #           docker pull registry.digitalocean.com/${{ secrets.DIGITALOCEAN_REGISTRY }}/10xproject:latest
+  #           docker stop 10xproject-container || true
+  #           docker rm 10xproject-container || true
+  #           docker run -d --name 10xproject-container -p 80:3000 registry.digitalocean.com/${{ secrets.DIGITALOCEAN_REGISTRY }}/10xproject:latest 
