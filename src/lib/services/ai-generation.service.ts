@@ -63,6 +63,7 @@ DO NOT include any additional text or explanation in your response, ONLY the JSO
  */
 export class AIGenerationService {
   private openRouter: OpenRouterService;
+  private defaultModel = 'qwen/qwen3-1.7b:free';
 
   constructor(
     private supabaseClient: SupabaseClient<Database>,
@@ -79,6 +80,44 @@ export class AIGenerationService {
   }
 
   /**
+   * Logs an error to the generation_error_logs table
+   * @param error - The error that occurred
+   * @param userId - User ID who initiated the generation
+   * @param inputText - Original input text
+   * @param model - AI model used
+   */
+  private async logError(
+    error: unknown,
+    userId: string,
+    inputText: string = '',
+    model: string = this.defaultModel
+  ): Promise<void> {
+    try {
+      // Generate hash only if inputText is provided
+      const sourceTextHash = inputText ? this.generateTextHash(inputText) : '';
+      
+      // Create error log entry
+      const errorLog = {
+        user_id: userId,
+        error_code: error instanceof Error ? error.name : "UNKNOWN_ERROR",
+        error_message: error instanceof Error ? error.message : String(error),
+        source_text_hash: sourceTextHash,
+        source_text_length: inputText ? inputText.length : 0,
+        model: model
+      };
+      
+      // Insert into generation_error_logs
+      await this.supabaseClient
+        .from("generation_error_logs")
+        .insert(errorLog);
+        
+      console.error("Error logged to database:", errorLog.error_code, errorLog.error_message);
+    } catch (logError) {
+      console.error("Failed to log error to database:", logError);
+    }
+  }
+
+  /**
    * Generates flashcards from input text using AI
    * @param inputText - Text to generate flashcards from
    * @param userId - ID of the user requesting generation
@@ -88,13 +127,30 @@ export class AIGenerationService {
     inputText: string,
     userId: string
   ): Promise<GenerationResponseDto> {
+    let model = this.defaultModel;
+    
     try {
       console.log("Starting flashcard generation for user:", userId);
       
+      // Validate user ID
+      if (!userId) {
+        const error = new Error("User ID is required for flashcard generation");
+        error.name = "MISSING_USER_ID";
+        throw error;
+      }
+      
       // Ensure input text meets minimum length requirement (for database constraint)
       const MIN_TEXT_LENGTH = 1000;
+      if (!inputText) {
+        const error = new Error("Input text is required for flashcard generation");
+        error.name = "MISSING_INPUT_TEXT";
+        throw error;
+      }
+      
       if (inputText.length < MIN_TEXT_LENGTH) {
-        throw new Error(`Input text must be at least ${MIN_TEXT_LENGTH} characters long (currently ${inputText.length} characters)`);
+        const error = new Error(`Input text must be at least ${MIN_TEXT_LENGTH} characters long (currently ${inputText.length} characters)`);
+        error.name = "INPUT_TOO_SHORT";
+        throw error;
       }
       
       // Generate hash of input text
@@ -102,68 +158,62 @@ export class AIGenerationService {
       console.log("Generated hash:", sourceTextHash);
       
       // Call AI to generate flashcards
-      const aiResponse = await this.callAIForFlashcards(inputText);
-      const generatedFlashcards = aiResponse.flashcards;
-      const model = aiResponse.model || 'qwen/qwen3-1.7b:free'; // Use actual model from response or default
-      
-      console.log("Generated flashcards count:", generatedFlashcards.length);
-      console.log("Using model:", model);
-      
-      // Save generation data to the database
-      const { data: generationData, error: generationError } = await this.supabaseClient
-        .from("generations")
-        .insert({
+      try {
+        const aiResponse = await this.callAIForFlashcards(inputText);
+        const generatedFlashcards = aiResponse.flashcards;
+        model = aiResponse.model || this.defaultModel;
+        
+        console.log("Generated flashcards count:", generatedFlashcards.length);
+        console.log("Using model:", model);
+        
+        // Save generation data to the database
+        const { data: generationData, error: generationError } = await this.supabaseClient
+          .from("generations")
+          .insert({
+            user_id: userId,
+            source_text_hash: sourceTextHash,
+            source_text_length: inputText.length,
+            model: model,
+            generated_count: generatedFlashcards.length,
+            accepted_edited_count: 0,
+            accepted_unedited_count: 0
+          })
+          .select()
+          .single();
+        
+        if (generationError) {
+          console.error("Error saving generation data:", generationError);
+          const error = new Error(`Failed to save generation data: ${generationError.message}`);
+          error.name = "DATABASE_ERROR";
+          throw error;
+        }
+        
+        // Map flashcards with generation ID but DON'T save them to the database yet
+        // They will be saved individually when accepted by the user
+        const flashcardsWithGenerationId = generatedFlashcards.map(card => ({
+          front: card.front,
+          back: card.back,
+          source: card.source,
           user_id: userId,
-          source_text_hash: sourceTextHash,
-          source_text_length: inputText.length,
-          model: model,
-          generated_count: generatedFlashcards.length,
-          accepted_edited_count: 0,
-          accepted_unedited_count: 0
-        })
-        .select()
-        .single();
-      
-      if (generationError) {
-        console.error("Error saving generation data:", generationError);
-        throw new Error(`Failed to save generation data: ${generationError.message}`);
+          generation_id: generationData.id
+        })) as GeneratedFlashcardDto[];
+        
+        return {
+          generation_id: generationData.id,
+          flashcards: flashcardsWithGenerationId
+        };
+      } catch (aiError) {
+        // Handle AI-specific errors separately
+        console.error("Error in AI generation:", aiError);
+        const error = aiError instanceof Error ? aiError : new Error(String(aiError));
+        error.name = aiError instanceof Error ? aiError.name || "AI_GENERATION_ERROR" : "AI_GENERATION_ERROR";
+        throw error;
       }
-      
-      // Map flashcards with generation ID but DON'T save them to the database yet
-      // They will be saved individually when accepted by the user
-      const flashcardsWithGenerationId = generatedFlashcards.map(card => ({
-        front: card.front,
-        back: card.back,
-        source: card.source,
-        user_id: userId,
-        generation_id: generationData.id
-      })) as GeneratedFlashcardDto[];
-      
-      return {
-        generation_id: generationData.id,
-        flashcards: flashcardsWithGenerationId
-      };
     } catch (error) {
       console.error("Error in generateFlashcards:", error);
       
       // Log error to the database
-      if (inputText) {
-        try {
-          const sourceTextHash = this.generateTextHash(inputText);
-          await this.supabaseClient
-            .from("generation_error_logs")
-            .insert({
-              user_id: userId,
-              error_code: error instanceof Error ? error.name : "UNKNOWN_ERROR",
-              error_message: error instanceof Error ? error.message : String(error),
-              source_text_hash: sourceTextHash,
-              source_text_length: inputText.length,
-              model: 'qwen/qwen3-1.7b:free' // Default model from OpenRouter
-            });
-        } catch (logError) {
-          console.error("Failed to log error:", logError);
-        }
-      }
+      await this.logError(error, userId, inputText, model);
       
       if (error instanceof Error) {
         throw new Error(`Failed to generate flashcards: ${error.message}`);
@@ -181,20 +231,65 @@ export class AIGenerationService {
     try {
       console.log('Calling OpenRouter with input:', inputText);
       
-      const response = await this.openRouter.sendChat(
-        [
-          { role: 'system', content: SYSTEM_PROMPT },
-          { role: 'user', content: inputText }
-        ],
-        {
-          responseFormat: FLASHCARDS_RESPONSE_FORMAT
-        }
-      );
+      if (!this.openRouter) {
+        const error = new Error('OpenRouter service not initialized');
+        error.name = "SERVICE_NOT_INITIALIZED";
+        throw error;
+      }
+      
+      // Make API call to OpenRouter
+      let response;
+      try {
+        response = await this.openRouter.sendChat(
+          [
+            { role: 'system', content: SYSTEM_PROMPT },
+            { role: 'user', content: inputText }
+          ],
+          {
+            responseFormat: FLASHCARDS_RESPONSE_FORMAT
+          }
+        );
+      } catch (apiError) {
+        // Handle API specific errors
+        const error = new Error(`OpenRouter API error: ${apiError instanceof Error ? apiError.message : String(apiError)}`);
+        error.name = "OPENROUTER_API_ERROR";
+        throw error;
+      }
 
       console.log('OpenRouter response:', JSON.stringify(response, null, 2));
 
-      if (!response.structured?.flashcards || !Array.isArray(response.structured.flashcards)) {
-        throw new Error('Invalid response format from AI');
+      // Validate response structure
+      if (!response) {
+        const error = new Error('Empty response from OpenRouter API');
+        error.name = "EMPTY_API_RESPONSE";
+        throw error;
+      }
+
+      if (!response.structured) {
+        const error = new Error('Missing structured data in AI response');
+        error.name = "INVALID_RESPONSE_FORMAT";
+        throw error;
+      }
+
+      if (!response.structured.flashcards || !Array.isArray(response.structured.flashcards)) {
+        const error = new Error('Invalid or missing flashcards array in AI response');
+        error.name = "MISSING_FLASHCARDS";
+        throw error;
+      }
+
+      if (response.structured.flashcards.length === 0) {
+        const error = new Error('AI generated empty flashcards list');
+        error.name = "EMPTY_FLASHCARDS";
+        throw error;
+      }
+
+      // Validate each flashcard
+      for (const card of response.structured.flashcards) {
+        if (!card.front || !card.back) {
+          const error = new Error('Flashcard missing required fields (front or back)');
+          error.name = "INVALID_FLASHCARD_FORMAT";
+          throw error;
+        }
       }
 
       // Transform the structured response into our DTO format
@@ -206,10 +301,11 @@ export class AIGenerationService {
       
       return {
         flashcards,
-        model: response.model || 'qwen/qwen3-1.7b:free'
+        model: response.model || this.defaultModel
       };
     } catch (error) {
       console.error("Error calling AI service:", error);
+      // Error will be propagated up to be logged in generateFlashcards
       throw error;
     }
   }

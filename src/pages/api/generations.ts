@@ -56,8 +56,10 @@ export const POST: APIRoute = async ({ request, locals }) => {
     if (!userId) {
       return new Response(
         JSON.stringify({
-          error: "Unauthorized",
-          message: "Musisz być zalogowany, aby korzystać z generatora."
+          error: {
+            code: "UNAUTHORIZED",
+            message: "Musisz być zalogowany, aby korzystać z generatora."
+          }
         }),
         {
           status: 401,
@@ -66,22 +68,106 @@ export const POST: APIRoute = async ({ request, locals }) => {
       );
     }
 
+    // Check if OPENROUTER_API_KEY is available
+    const apiKey = import.meta.env.OPENROUTER_API_KEY;
+    if (!apiKey) {
+      // Log this error to the database
+      try {
+        await supabase
+          .from("generation_error_logs")
+          .insert({
+            user_id: userId,
+            error_code: "MISSING_API_KEY",
+            error_message: "OpenRouter API key is not configured on the server",
+            source_text_hash: "",
+            source_text_length: 0,
+            model: "unknown"
+          });
+      } catch (logError) {
+        console.error("Failed to log API key error:", logError);
+      }
+
+      return new Response(
+        JSON.stringify({
+          error: {
+            code: "SERVICE_UNAVAILABLE",
+            message: "Usługa generatora jest obecnie niedostępna. Prosimy spróbować później."
+          }
+        }),
+        {
+          status: 503,
+          headers: { 'Content-Type': 'application/json' }
+        }
+      );
+    }
+
     // Initialize AI Generation Service
     const aiService = new AIGenerationService(
       supabase,
-      import.meta.env.OPENROUTER_API_KEY
+      apiKey
     );
 
     // Parse the request body
-    const body = await request.json();
+    let body;
+    try {
+      body = await request.json();
+    } catch (parseError) {
+      // Log JSON parsing error
+      try {
+        await supabase
+          .from("generation_error_logs")
+          .insert({
+            user_id: userId,
+            error_code: "INVALID_JSON",
+            error_message: parseError instanceof Error ? parseError.message : "Nieprawidłowy format JSON",
+            source_text_hash: "",
+            source_text_length: 0,
+            model: "unknown"
+          });
+      } catch (logError) {
+        console.error("Failed to log JSON parsing error:", logError);
+      }
+
+      return new Response(
+        JSON.stringify({
+          error: {
+            code: "INVALID_REQUEST",
+            message: "Nieprawidłowy format zapytania. Oczekiwany poprawny format JSON."
+          }
+        }),
+        {
+          status: 400,
+          headers: { 'Content-Type': 'application/json' }
+        }
+      );
+    }
     
     // Validate the request body
     const validationResult = GenerationSchema.safeParse(body);
     if (!validationResult.success) {
+      // Log validation error
+      try {
+        await supabase
+          .from("generation_error_logs")
+          .insert({
+            user_id: userId,
+            error_code: "VALIDATION_ERROR",
+            error_message: JSON.stringify(validationResult.error.format()),
+            source_text_hash: "",
+            source_text_length: body?.input_text?.length || 0,
+            model: "unknown"
+          });
+      } catch (logError) {
+        console.error("Failed to log validation error:", logError);
+      }
+
       return new Response(
         JSON.stringify({
-          error: "Invalid input",
-          details: validationResult.error.format()
+          error: {
+            code: "INVALID_INPUT",
+            message: "Nieprawidłowe dane wejściowe",
+            details: validationResult.error.format()
+          }
         }),
         {
           status: 400,
@@ -94,23 +180,63 @@ export const POST: APIRoute = async ({ request, locals }) => {
     const { input_text } = validationResult.data;
     
     // Generate flashcards using AI service
-    const generatedData = await aiService.generateFlashcards(input_text, userId);
-    
-    // Return response
-    return new Response(
-      JSON.stringify(generatedData),
-      {
-        status: 200,
-        headers: { 'Content-Type': 'application/json' }
+    try {
+      const generatedData = await aiService.generateFlashcards(input_text, userId);
+      
+      // Return response
+      return new Response(
+        JSON.stringify(generatedData),
+        {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' }
+        }
+      );
+    } catch (generationError) {
+      // Error is already logged to the database in the AIGenerationService
+      console.error('Error generating flashcards:', generationError);
+      
+      // Determine the appropriate error code and message based on the error
+      let statusCode = 500;
+      let errorCode = "GENERATION_FAILED";
+      let errorMessage = "Wystąpił błąd podczas generowania fiszek.";
+      
+      // Handle specific error cases
+      if (generationError instanceof Error) {
+        const message = generationError.message;
+        
+        if (message.includes("at least") && message.includes("characters")) {
+          statusCode = 400;
+          errorCode = "INPUT_TOO_SHORT";
+          errorMessage = message;
+        } else if (message.includes("OpenRouter API error")) {
+          statusCode = 503;
+          errorCode = "AI_SERVICE_ERROR";
+          errorMessage = "Serwis AI jest chwilowo niedostępny. Prosimy spróbować później.";
+        }
       }
-    );
+      
+      return new Response(
+        JSON.stringify({
+          error: {
+            code: errorCode,
+            message: errorMessage
+          }
+        }),
+        {
+          status: statusCode,
+          headers: { 'Content-Type': 'application/json' }
+        }
+      );
+    }
   } catch (error) {
-    console.error('Error generating flashcards:', error);
+    console.error('Unexpected error in generations endpoint:', error);
     
     return new Response(
       JSON.stringify({
-        error: "Failed to generate flashcards",
-        message: error instanceof Error ? error.message : "Unknown error"
+        error: {
+          code: "SERVER_ERROR",
+          message: "Wystąpił nieoczekiwany błąd serwera."
+        }
       }),
       {
         status: 500,

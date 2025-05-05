@@ -45,6 +45,89 @@ const { title } = Astro.props;
 				window.localStorage.setItem('theme', newTheme);
 			});
 		</script>
+		
+		<script is:inline>
+			// Globalny mechanizm monitorowania sesji
+			(function() {
+				// Przechwyć natywną metodę fetch
+				const originalFetch = window.fetch;
+				
+				// Zastąp ją własną implementacją
+				window.fetch = async function(resource, options) {
+					// Wywołaj oryginalny fetch
+					const response = await originalFetch(resource, options);
+					
+					// Jeśli odpowiedź to 401 Unauthorized i nie jesteśmy już na stronie logowania
+					if (response.status === 401 && !window.location.pathname.includes('/auth')) {
+						// Klonujemy response, ponieważ oryginalny zostanie zużyty
+						const clone = response.clone();
+						
+						try {
+							// Sprawdź czy to na pewno odpowiedź z naszego API
+							const data = await clone.json();
+							if (data.error?.code === "UNAUTHORIZED") {
+								console.log('Sesja wygasła. Przekierowywanie do strony logowania...');
+								
+								// Wyświetl informację dla użytkownika
+								if (!window._sessionTimeoutNotified) {
+									window._sessionTimeoutNotified = true;
+									alert('Twoja sesja wygasła. Zostaniesz przekierowany do strony logowania.');
+								}
+								
+								// Wyczyść dane sesji
+								localStorage.removeItem('auth_token');
+								localStorage.removeItem('user_id');
+								localStorage.removeItem('user_email');
+								document.cookie = "auth_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Strict";
+								
+								// Przekieruj do strony logowania
+								window.location.href = '/auth';
+								return new Response(JSON.stringify({ redirected: true }));
+							}
+						} catch (e) {
+							// Błąd parsowania JSON, to prawdopodobnie nie nasza odpowiedź API
+							// Ignoruj i kontynuuj
+						}
+					}
+					
+					return response;
+				};
+				
+				// Monitoruj również odpowiedzi XMLHttpRequest
+				const originalXhrOpen = XMLHttpRequest.prototype.open;
+				XMLHttpRequest.prototype.open = function() {
+					this.addEventListener('load', function() {
+						if (this.status === 401 && !window.location.pathname.includes('/auth')) {
+							try {
+								const data = JSON.parse(this.responseText);
+								if (data.error?.code === "UNAUTHORIZED") {
+									console.log('Sesja wygasła. Przekierowywanie do strony logowania...');
+									
+									// Wyświetl informację dla użytkownika
+									if (!window._sessionTimeoutNotified) {
+										window._sessionTimeoutNotified = true;
+										alert('Twoja sesja wygasła. Zostaniesz przekierowany do strony logowania.');
+									}
+									
+									// Wyczyść dane sesji
+									localStorage.removeItem('auth_token');
+									localStorage.removeItem('user_id');
+									localStorage.removeItem('user_email');
+									document.cookie = "auth_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Strict";
+									
+									// Przekieruj do strony logowania
+									window.location.href = '/auth';
+								}
+							} catch (e) {
+								// Błąd parsowania JSON, to prawdopodobnie nie nasza odpowiedź API
+								// Ignoruj i kontynuuj
+							}
+						}
+					});
+					return originalXhrOpen.apply(this, arguments);
+				};
+			})();
+		</script>
 	</head>
 	<body class="min-h-screen bg-background font-sans antialiased">
 		<slot />

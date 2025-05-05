@@ -14,8 +14,10 @@ export interface ActionCardProps {
   title: string;
   description: string;
   icon: string;
-  linkTo: string;
+  linkTo: string | null;
   variant?: 'default' | 'primary' | 'secondary';
+  disabled?: boolean;
+  tooltip?: string;
 }
 
 // Props dla komponentu ActionCardGrid

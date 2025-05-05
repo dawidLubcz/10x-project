@@ -51,7 +51,12 @@ try {
 							<li><a href="/" class="px-3 py-1 rounded-md flex items-center text-zinc-900 dark:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors">Dashboard</a></li>
 							<li><a href="/flashcards" class="px-3 py-1 rounded-md flex items-center text-zinc-900 dark:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors">Fiszki</a></li>
 							<li><a href="/generate" class="px-3 py-1 rounded-md flex items-center text-zinc-900 dark:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors">Generator AI</a></li>
-							<li><a href="/learn" class="px-3 py-1 rounded-md flex items-center text-zinc-900 dark:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors">Nauka</a></li>
+							<li><span class="px-3 py-1 rounded-md flex items-center text-zinc-500 dark:text-zinc-500 cursor-not-allowed relative group">
+								Nauka
+								<span class="absolute left-1/2 -translate-x-1/2 top-full mt-2 px-2 py-1 bg-black/80 text-white text-xs rounded opacity-0 group-hover:opacity-100 whitespace-nowrap transition-opacity pointer-events-none z-10">
+									Funkcjonalność niedostępna w MVP
+								</span>
+							</span></li>
 							<li><a href="/profile" class="font-semibold text-primary bg-primary/10 px-3 py-1 rounded-md flex items-center gap-1 hover:bg-primary/20 transition-colors">
 								<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user"><circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 0 0-16 0"/></svg>
 								<span id="user-email">{userEmail || "Profil użytkownika"}</span>
@@ -107,8 +112,10 @@ try {
 								title: "Rozpocznij naukę",
 								description: "Zacznij sesję nauki z wykorzystaniem fiszek",
 								icon: "N",
-								linkTo: "/learn",
-								variant: "secondary"
+								linkTo: null,
+								variant: "secondary",
+								disabled: true,
+								tooltip: "Funkcjonalność niedostępna w MVP"
 							}
 						]}
 					/>
