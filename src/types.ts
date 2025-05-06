@@ -130,14 +130,14 @@ export interface UpdateGeneratedFlashcardDto {
  **********************/
 
 /** Request DTO for logging generation errors */
-export type GenerationErrorLogDto = {
+export interface GenerationErrorLogDto {
   user_id: string;
   model: string;
   source_text_hash: string;
   source_text_length: number;
   error_code: string;
   error_message: string | null;
-};
+}
 
 /** Response DTO for error log confirmation */
 export interface ErrorLogResponseDto {

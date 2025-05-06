@@ -11,6 +11,7 @@ export const AlertDialog: React.FC<AlertDialogProps> = ({
   onOpenChange,
   children 
 }) => {
+  const containerRef = React.useRef<HTMLDivElement>(null);
   React.useEffect(() => {
     if (open) {
       document.body.style.overflow = "hidden";
@@ -21,17 +22,34 @@ export const AlertDialog: React.FC<AlertDialogProps> = ({
       document.body.style.overflow = "";
     };
   }, [open]);
+  React.useEffect(() => {
+    if (!open) return;
+    const handleClickOutside = (event: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        onOpenChange?.(false);
+      }
+    };
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        onOpenChange?.(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [open, onOpenChange]);
 
   if (!open) return null;
 
   return (
     <div 
+      ref={containerRef}
       className="fixed inset-0 z-50 flex items-center justify-center"
-      onClick={(e) => {
-        if (e.target === e.currentTarget) {
-          onOpenChange?.(false);
-        }
-      }}
+      role="dialog"
+      aria-modal="true"
     >
       <div className="fixed inset-0 bg-background/80 backdrop-blur-sm" />
       {children}

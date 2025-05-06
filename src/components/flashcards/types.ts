@@ -2,8 +2,7 @@ import type {
   FlashcardDto, 
   FlashcardQueryParams, 
   PaginationDto, 
-  UpdateFlashcardDto,
-  FlashcardSource
+  UpdateFlashcardDto
 } from "../../types";
 
 // ViewModel dla listy fiszek

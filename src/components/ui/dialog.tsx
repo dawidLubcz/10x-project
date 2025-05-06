@@ -1,6 +1,5 @@
 import * as React from "react"
 import * as DialogPrimitive from "@radix-ui/react-dialog"
-import { XIcon } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
@@ -14,27 +13,35 @@ const DialogComponent: React.FC<{
   onOpenChange,
   children 
 }) => {
+  const containerRef = React.useRef<HTMLDivElement>(null);
   React.useEffect(() => {
-    if (open) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
-    return () => {
-      document.body.style.overflow = "";
+    if (!open) return;
+    const handleClickOutside = (event: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        onOpenChange?.(false);
+      }
     };
-  }, [open]);
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        onOpenChange?.(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [open, onOpenChange]);
 
   if (!open) return null;
 
   return (
     <div 
+      ref={containerRef}
       className="fixed inset-0 z-50 flex items-center justify-center"
-      onClick={(e) => {
-        if (e.target === e.currentTarget) {
-          onOpenChange?.(false);
-        }
-      }}
+      role="dialog"
+      aria-modal="true"
     >
       <div className="fixed inset-0 bg-background/80 backdrop-blur-sm" />
       {children}

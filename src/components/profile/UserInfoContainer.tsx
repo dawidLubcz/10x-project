@@ -6,7 +6,7 @@ import UserInfo from "../UserInfo";
  * Komponent-kontener, który pobiera dane profilu i przekazuje je do komponentu prezentacyjnego
  */
 const UserInfoContainer: FC = () => {
-  const { profile, isLoading, error } = useProfile();
+  const { profile, isLoading } = useProfile();
   
   return <UserInfo user={profile} isLoading={isLoading} />;
 };

@@ -1,5 +1,4 @@
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { Loader2, CheckCircle, XCircle, Edit } from "lucide-react";
 import type { FlashcardViewModel } from "../types/generateView";
 

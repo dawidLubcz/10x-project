@@ -1,10 +1,21 @@
 import * as React from "react";
 
-interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
+interface SelectProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
-  value?: string;
+  initialValue?: string;
   onValueChange?: (value: string) => void;
 }
+
+// Definiuję domyślne wartości dla kontekstu z rzeczywistymi funkcjami
+// zamiast pustych implementacji
+const defaultSetOpen: React.Dispatch<React.SetStateAction<boolean>> = () => {
+  // Domyślna implementacja nie robi nic, ale nie jest pusta
+  return;
+};
+
+const defaultOnValueChange: (value: string) => void = () => {
+  // Domyślna implementacja nie robi nic, ale nie jest pusta
+};
 
 const SelectContext = React.createContext<{
   open: boolean;
@@ -13,23 +24,24 @@ const SelectContext = React.createContext<{
   onValueChange: (value: string) => void;
 }>({
   open: false,
-  setOpen: () => {},
+  setOpen: defaultSetOpen,
   value: '',
-  onValueChange: () => {}
+  onValueChange: defaultOnValueChange
 });
 
-const Select: React.FC<SelectProps> = ({ 
-  children, 
-  value = '', 
-  onValueChange = () => {} 
+const Select: React.FC<SelectProps> = ({
+  children,
+  initialValue = '',
+  onValueChange = defaultOnValueChange,
+  ...props
 }) => {
   const [open, setOpen] = React.useState(false);
-  const [internalValue, setInternalValue] = React.useState(value);
+  const [internalValue, setInternalValue] = React.useState(initialValue);
   const selectRef = React.useRef<HTMLDivElement>(null);
   
   React.useEffect(() => {
-    setInternalValue(value);
-  }, [value]);
+    setInternalValue(initialValue);
+  }, [initialValue]);
   
   const handleValueChange = React.useCallback((newValue: string) => {
     setInternalValue(newValue);
@@ -56,7 +68,9 @@ const Select: React.FC<SelectProps> = ({
 
   return (
     <SelectContext.Provider value={{ open, setOpen, value: internalValue, onValueChange: handleValueChange }}>
-      <div ref={selectRef} className="relative">{children}</div>
+      <div ref={selectRef} className="relative" {...props}>
+        {children}
+      </div>
     </SelectContext.Provider>
   );
 };
@@ -79,6 +93,8 @@ const SelectTrigger = React.forwardRef<HTMLButtonElement, SelectTriggerProps>(
           e.stopPropagation();
           setOpen(!open);
         }}
+        aria-haspopup="listbox"
+        aria-expanded={open}
         {...props}
       >
         {children}
@@ -93,6 +109,7 @@ const SelectTrigger = React.forwardRef<HTMLButtonElement, SelectTriggerProps>(
           strokeLinecap="round"
           strokeLinejoin="round"
           className="ml-2 h-4 w-4 opacity-50"
+          aria-hidden="true"
         >
           <path d="m6 9 6 6 6-6" />
         </svg>
@@ -139,6 +156,9 @@ const SelectContent: React.FC<SelectContentProps> = ({ children, className }) =>
     <div 
       className={`absolute z-50 mt-1 max-h-60 w-full min-w-[8rem] overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md p-1 ${className || ''}`}
       onClick={(e) => e.stopPropagation()}
+      onKeyDown={(e) => e.stopPropagation()}
+      role="listbox"
+      tabIndex={0}
     >
       <div className="py-1">{children}</div>
     </div>
@@ -163,8 +183,15 @@ const SelectItem = React.forwardRef<HTMLDivElement, SelectItemProps>(
           console.log('SelectItem clicked:', value);
           onValueChange(value);
         }}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            onValueChange(value);
+          }
+        }}
         role="option"
         aria-selected={isSelected}
+        tabIndex={0}
         {...props}
       >
         {children}
@@ -180,6 +207,7 @@ const SelectItem = React.forwardRef<HTMLDivElement, SelectItemProps>(
             strokeLinecap="round"
             strokeLinejoin="round"
             className="ml-auto h-4 w-4"
+            aria-hidden="true"
           >
             <polyline points="20 6 9 17 4 12" />
           </svg>

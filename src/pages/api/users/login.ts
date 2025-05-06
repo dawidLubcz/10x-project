@@ -26,7 +26,7 @@ export async function POST(context: APIContext): Promise<Response> {
     let requestData: unknown;
     try {
       requestData = await context.request.json();
-    } catch (error) {
+    } catch {
       return new Response(
         JSON.stringify({ message: "Nieprawidłowe dane wejściowe" }),
         { status: 400, headers: { "Content-Type": "application/json" } }

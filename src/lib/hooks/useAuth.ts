@@ -1,10 +1,5 @@
 import { useState, useCallback } from 'react';
-import type { 
-  RegisterUserDto, 
-  UserDto, 
-  LoginRequestDto, 
-  LoginResponseDto 
-} from '@/types';
+import type { UserDto, LoginResponseDto } from '@/types';
 
 // Typ błędu dla symulowanych odpowiedzi
 interface MockError {
@@ -13,7 +8,7 @@ interface MockError {
 
 // Funkcja symulująca autentykację (do momentu skonfigurowania rzeczywistego Supabase)
 const mockAuth = {
-  signInWithPassword: async ({ email, password }: { email: string; password: string }) => {
+  signInWithPassword: async ({ email }: { email: string; password: string }) => {
     // Symulacja opóźnienia zapytania
     await new Promise(resolve => setTimeout(resolve, 500));
     
@@ -40,16 +35,6 @@ const mockAuth = {
 interface AuthCredentials {
   email: string;
   password: string;
-}
-
-interface RegisterResponse {
-  id: string;
-  email: string;
-  created_at: string;
-}
-
-interface RegisterError {
-  error: string;
 }
 
 export function useAuth() {
@@ -186,14 +171,4 @@ export function useAuth() {
     logout,
     isAuthenticated: !!user
   };
-}
-
-function mapAuthError(error: any): string {
-  const errorMap: Record<string, string> = {
-    'invalid_credentials': 'Nieprawidłowy email lub hasło.',
-    'user_already_exists': 'Użytkownik o podanym adresie email już istnieje.',
-    'email_not_confirmed': 'Adres email nie został potwierdzony.',
-  };
-  
-  return errorMap[error.message] || 'Wystąpił błąd podczas operacji autentykacji.';
 } 

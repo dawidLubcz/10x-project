@@ -1,6 +1,3 @@
-import { clsx, type ClassValue } from "clsx"
-import { twMerge } from "tailwind-merge"
-
 /**
  * Utility function to conditionally join class names
  */
@@ -18,7 +15,7 @@ export function cn(...classes: (string | undefined | null | false)[]): string {
  * @param cookieName - Nazwa cookie do wyodrębnienia (domyślnie 'auth_token')
  * @returns Wartość tokenu lub null jeśli nie znaleziono
  */
-export function extractTokenFromCookie(cookieHeader: string | null, cookieName: string = 'auth_token'): string | null {
+export function extractTokenFromCookie(cookieHeader: string | null, cookieName = 'auth_token'): string | null {
   if (!cookieHeader) {
     return null;
   }

@@ -2,7 +2,11 @@ import * as React from "react"
 
 import { cn } from "@/lib/utils"
 
-interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {}
+/**
+ * Rozszerzony interfejs dla pól tekstowych, pozwalający na ewentualne rozszerzenie w przyszłości.
+ * Aktualnie nie dodaje nowych właściwości do standardowego interfejsu textarea.
+ */
+export type TextareaProps = React.TextareaHTMLAttributes<HTMLTextAreaElement>;
 
 const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
   ({ className = "", ...props }, ref) => {

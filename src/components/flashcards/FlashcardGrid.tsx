@@ -2,7 +2,6 @@ import React from 'react';
 import { FlashcardItem } from './FlashcardItem';
 import { Loader2 } from 'lucide-react';
 import type { FlashcardGridProps } from './types';
-import type { FlashcardDto } from '../../types';
 
 /**
  * Komponent wyświetlający siatkę fiszek

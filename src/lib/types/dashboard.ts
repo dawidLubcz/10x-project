@@ -1,5 +1,4 @@
-import type { ReactNode } from "react";
-import type { FlashcardSource } from "../../types";
+import type { FlashcardDto } from "../../types";
 
 // Statystyki fiszek (ViewModel)
 export interface FlashcardStatistics {
@@ -41,7 +40,7 @@ export interface UseFlashcardStatisticsResult {
 
 // Hook useQuickCreateFlashcard response
 export interface UseQuickCreateFlashcardResult {
-  createFlashcard: (data: QuickCreateFormData) => Promise<any>;
+  createFlashcard: (data: QuickCreateFormData) => Promise<FlashcardDto | null>;
   loading: boolean;
   error: Error | null;
   success: boolean;

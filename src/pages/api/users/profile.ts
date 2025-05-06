@@ -1,7 +1,5 @@
 import type { APIRoute } from "astro";
 import { userProfileResponseSchema } from "../../../lib/schemas/user.schema";
-import type { SupabaseClient } from "@supabase/supabase-js";
-import type { Database } from "../../../db/database.types";
 import type { UserDto } from "../../../types";
 
 export const prerender = false;

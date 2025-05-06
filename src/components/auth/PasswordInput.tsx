@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Button } from "../ui/button";
 import { Eye as EyeIcon, EyeOff as EyeOffIcon } from 'lucide-react';
-import { InputField } from './InputField';
 import { PasswordStrengthIndicator } from './PasswordStrengthIndicator';
 import type { PasswordInputProps } from './types';
 import { cn } from '@/lib/utils';
@@ -21,7 +20,7 @@ export function PasswordInput({
   onChange,
   onBlur,
   'data-testid': dataTestId,
-  ...props
+  ...restProps
 }: PasswordInputProps) {
   const [showPassword, setShowPassword] = useState(false);
   
@@ -39,7 +38,6 @@ export function PasswordInput({
           type={showPassword ? 'text' : 'password'}
           value={value}
           placeholder={placeholder}
-          error={error}
           disabled={disabled}
           required={required}
           onChange={onChange}
@@ -48,6 +46,7 @@ export function PasswordInput({
           aria-invalid={!!error}
           aria-describedby={error ? `${id}-error` : undefined}
           data-testid={dataTestId}
+          {...restProps}
         />
         <Button
           type="button"
@@ -67,7 +66,7 @@ export function PasswordInput({
         </Button>
       </div>
       
-      {showStrengthIndicator && value && (
+      {showStrengthIndicator && typeof value === 'string' && value && (
         <PasswordStrengthIndicator password={value} />
       )}
     </div>

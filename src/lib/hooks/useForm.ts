@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 
-export function useForm<T extends Record<string, any>>(initialState: T) {
+export function useForm<T extends Record<string, unknown>>(initialState: T) {
   const [values, setValues] = useState<T>(initialState);
   const [errors, setErrors] = useState<Partial<Record<keyof T, string>>>({});
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
@@ -10,7 +10,7 @@ export function useForm<T extends Record<string, any>>(initialState: T) {
     setValues(prev => ({ ...prev, [name]: value }));
   }, []);
   
-  const validate = useCallback((validators: Record<keyof T, (value: any) => string | null>) => {
+  const validate = useCallback((validators: Record<keyof T, (value: unknown) => string | null>) => {
     const newErrors: Partial<Record<keyof T, string>> = {};
     let isValid = true;
     
@@ -26,7 +26,7 @@ export function useForm<T extends Record<string, any>>(initialState: T) {
     return isValid;
   }, [values]);
   
-  const handleSubmit = useCallback((validators: Record<keyof T, (value: any) => string | null>, onSubmit: (values: T) => Promise<void>) => {
+  const handleSubmit = useCallback((validators: Record<keyof T, (value: unknown) => string | null>, onSubmit: (values: T) => Promise<void>) => {
     return async (e: React.FormEvent) => {
       e.preventDefault();
       

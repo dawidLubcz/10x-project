@@ -7,6 +7,7 @@ import { useForm } from '../../lib/hooks/useForm';
 import { useAuth } from '../../lib/hooks/useAuth';
 import type { LoginFormState } from './types';
 import { loginSchema } from '../../lib/schemas/login.schema';
+import { ZodError } from 'zod';
 
 interface LoginFormProps {
   onSuccess?: () => void;
@@ -25,22 +26,28 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
   const { login, error: authError, loading } = useAuth();
   
   const validators = {
-    email: (value: string) => {
+    email: (value: string): string | null => {
       try {
         loginSchema.shape.email.parse(value);
         return null;
-      } catch (error: any) {
-        return error.errors?.[0]?.message || 'Niepoprawny format adresu email';
+      } catch (error) {
+        if (error instanceof ZodError) {
+          return error.errors[0]?.message || 'Niepoprawny format adresu email';
+        }
+        return 'Niepoprawny format adresu email';
       }
     },
-    password: (value: string) => {
+    password: (value: string): string | null => {
       try {
         loginSchema.shape.password.parse(value);
         return null;
-      } catch (error: any) {
-        return error.errors?.[0]?.message || 'Hasło jest wymagane';
+      } catch (error) {
+        if (error instanceof ZodError) {
+          return error.errors[0]?.message || 'Hasło jest wymagane';
+        }
+        return 'Hasło jest wymagane';
       }
-    }
+    },
   };
   
   const onSubmitForm = async (formValues: LoginFormState) => {

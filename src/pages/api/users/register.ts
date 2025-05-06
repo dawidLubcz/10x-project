@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import type { APIRoute } from 'astro';
-import type { RegisterUserDto, UserDto } from '../../../types';
+import type { UserDto } from '../../../types';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Database } from '../../../db/database.types';
 

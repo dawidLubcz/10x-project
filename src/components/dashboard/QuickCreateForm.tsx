@@ -11,7 +11,6 @@ import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
 import { AlertTriangle, CheckCircle, Loader2 } from "lucide-react";
 import { useQuickCreateFlashcard } from "../../lib/hooks/useQuickCreateFlashcard";
 import type { QuickCreateFormData } from "../../lib/types/dashboard";
-import type { FieldPath, FieldValues } from "react-hook-form";
 
 // Walidacja formularza
 const formSchema = z.object({
@@ -75,7 +74,7 @@ const QuickCreateForm: React.FC = () => {
             <FormField
               control={form.control}
               name="front"
-              render={({ field }: { field: Record<string, any> }) => (
+              render={({ field }) => (
                 <FormItem>
                   <FormLabel className="text-foreground dark:text-zinc-200">Pytanie (front)</FormLabel>
                   <FormControl>
@@ -94,7 +93,7 @@ const QuickCreateForm: React.FC = () => {
             <FormField
               control={form.control}
               name="back"
-              render={({ field }: { field: Record<string, any> }) => (
+              render={({ field }) => (
                 <FormItem>
                   <FormLabel className="text-foreground dark:text-zinc-200">Odpowiedź (back)</FormLabel>
                   <FormControl>

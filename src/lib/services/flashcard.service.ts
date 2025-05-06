@@ -9,7 +9,6 @@ import type {
 } from "../../types";
 import { FlashcardSource } from "../../types";
 import { createFlashcardSchema, flashcardQuerySchema, updateFlashcardSchema } from "../schemas/flashcard.schemas";
-import { z } from 'zod';
 
 /**
  * Serwis do zarządzania fiszkami
@@ -138,7 +137,7 @@ export class FlashcardService {
    * @param data Dane do aktualizacji
    * @returns Zaktualizowana fiszka lub null jeśli nie znaleziono
    */
-  async updateFlashcard(id: number, userId: string, data: any): Promise<FlashcardDto | null> {
+  async updateFlashcard(id: number, userId: string, data: unknown): Promise<FlashcardDto | null> {
     // Walidacja danych wejściowych
     const validatedData = updateFlashcardSchema.parse(data);
 

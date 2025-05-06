@@ -21,7 +21,7 @@ jobs:
         run: npm install
         
       - name: Run linting
-        run: npm run lint || true  # Continue on lint errors but report them
+        run: npm run lint
 
   unit-tests:
     runs-on: ubuntu-latest

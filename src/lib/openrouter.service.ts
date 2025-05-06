@@ -15,21 +15,28 @@ export interface ResponseFormat {
   json_schema: {
     name: string;
     strict: boolean;
-    schema: any;
+    schema: unknown;
   };
 }
 
 export interface ChatResponse {
   content: string;
-  structured: any;
+  structured: unknown;
   model?: string;
+}
+
+// Define a type for the raw API response structure
+export interface ApiRawResponse {
+  choices?: { message?: { content?: unknown } }[];
+  model?: string;
+  [key: string]: unknown;
 }
 
 export interface OpenRouterOptions {
   apiKey: string;
   baseUrl?: string;
   defaultModel?: string;
-  defaultParams?: Record<string, any>;
+  defaultParams?: Record<string, unknown>;
 }
 
 // Custom error classes
@@ -72,7 +79,7 @@ export class OpenRouterService {
   private readonly apiKey: string;
   private readonly baseUrl: string;
   private model: string;
-  private params: Record<string, any>;
+  private params: Record<string, unknown>;
   private readonly headers: HeadersInit;
   private readonly agent: https.Agent;
 
@@ -97,7 +104,7 @@ export class OpenRouterService {
     this.model = model;
   }
 
-  public setParams(params: Record<string, any>): void {
+  public setParams(params: Record<string, unknown>): void {
     this.params = params;
   }
 
@@ -105,10 +112,10 @@ export class OpenRouterService {
     messages: ChatMessage[],
     options?: {
       model?: string;
-      params?: Record<string, any>;
+      params?: Record<string, unknown>;
       responseFormat?: ResponseFormat;
     }
-  ): Record<string, any> {
+  ): Record<string, unknown> {
     return {
       messages,
       model: options?.model || this.model,
@@ -118,7 +125,7 @@ export class OpenRouterService {
     };
   }
 
-  private validateResponse(raw: any, format?: ResponseFormat): boolean {
+  private validateResponse(raw: unknown, format?: ResponseFormat): boolean {
     if (!format) return true;
 
     try {
@@ -138,16 +145,18 @@ export class OpenRouterService {
     }
   }
 
-  private parseResponse(raw: any, format?: ResponseFormat): ChatResponse {
+  private parseResponse(raw: unknown, format?: ResponseFormat): ChatResponse {
+    // Log the raw response
     console.log('Raw API response:', JSON.stringify(raw, null, 2));
-    
-    const content = raw.choices?.[0]?.message?.content;
+    // Cast raw to ApiRawResponse for structured property access
+    const rawObj = raw as ApiRawResponse;
+    const content = rawObj.choices?.[0]?.message?.content;
     if (!content) {
-      console.error('Invalid API response format:', raw);
+      console.error('Invalid API response format:', rawObj);
       throw new ValidationError('Invalid response format from API');
     }
 
-    let structured = null;
+    let structured: unknown = null;
     if (format?.type === 'json_schema') {
       try {
         // If content is already an object, don't parse it
@@ -176,7 +185,7 @@ export class OpenRouterService {
     return {
       content: typeof content === 'string' ? content : JSON.stringify(content),
       structured,
-      model: raw.model || this.model // Use the model from response or fall back to the default
+      model: rawObj.model || this.model // Use the model from response or fall back to the default
     };
   }
 
@@ -210,7 +219,7 @@ export class OpenRouterService {
     messages: ChatMessage[],
     options?: {
       model?: string;
-      params?: Record<string, any>;
+      params?: Record<string, unknown>;
       responseFormat?: ResponseFormat;
     }
   ): Promise<ChatResponse> {

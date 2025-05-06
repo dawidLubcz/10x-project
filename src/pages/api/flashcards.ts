@@ -1,6 +1,6 @@
 import { FlashcardService } from "../../lib/services/flashcard.service";
 import type { APIContext } from "astro";
-import type { CreateFlashcardDto, FlashcardQueryParams } from "../../types";
+import type { CreateFlashcardDto, FlashcardQueryParams, FlashcardSource } from "../../types";
 
 // Wyłączenie prerenderowania dla endpointa API
 export const prerender = false;
@@ -73,11 +73,14 @@ export async function GET(context: APIContext) {
     const filter_source = url.searchParams.get("filter[source]");
 
     // Przygotowanie parametrów zapytania
+    // Cast query params to proper types
+    const sortByParam = sort_by as FlashcardQueryParams['sort_by'];
+    const filterSourceParam = filter_source as FlashcardSource;
     const queryParams: FlashcardQueryParams = {
       page: page ? parseInt(page) : undefined,
       limit: limit ? parseInt(limit) : undefined,
-      sort_by: sort_by as any || undefined,
-      filter: filter_source ? { source: filter_source as any } : undefined
+      sort_by: sortByParam || undefined,
+      filter: filter_source ? { source: filterSourceParam } : undefined
     };
 
     // Utworzenie serwisu i pobranie fiszek

@@ -1,5 +1,4 @@
 import { z } from "zod";
-import type { LoginRequestDto } from "../../types";
 
 /**
  * Schema for validating login requests

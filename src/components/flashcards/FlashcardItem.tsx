@@ -30,7 +30,7 @@ export const FlashcardItem: React.FC<FlashcardItemProps> = ({
   const shouldShowExpandButton = isFrontTruncated || isBackTruncated;
 
   // Funkcja zwracająca skróconą treść, jeśli fiszka nie jest rozwinięta
-  const truncateText = (text: string, maxLength: number = 100) => {
+  const truncateText = (text: string, maxLength = 100) => {
     if (!text) return '';
     
     if (flashcard.isExpanded) {

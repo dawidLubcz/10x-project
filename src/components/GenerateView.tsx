@@ -1,10 +1,9 @@
-import { useState } from 'react';
 import { InputForm } from './generate/InputForm';
 import { GenerationStatus } from './generate/GenerationStatus';
 import { FlashcardList } from './generate/FlashcardList';
 import { EditFlashcardModal } from './generate/EditFlashcardModal';
 import { useGenerateFlashcards } from './hooks/useGenerateFlashcards';
-import type { FlashcardViewModel, EditFlashcardData } from './types/generateView';
+import type { EditFlashcardData } from './types/generateView';
 
 export const GenerateView = () => {
   const {

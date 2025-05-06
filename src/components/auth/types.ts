@@ -29,4 +29,4 @@ export interface LoginFormState {
   validationErrors: Record<string, string>;
 }
 
-export interface RegisterFormState extends LoginFormState {} 
+export type RegisterFormState = LoginFormState; 

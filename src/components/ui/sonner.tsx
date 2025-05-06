@@ -1,7 +1,7 @@
 "use client"
 
 // Create a simplified toast component without external dependencies
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 
 // Types for toast
 type ToastType = 'default' | 'success' | 'error' | 'warning' | 'info';
@@ -30,12 +30,16 @@ export const useToaster = () => {
   return context;
 };
 
-// Export a toast utility that matches the API expected by useFlashcards.ts
-let contextValue: ToasterContextValue | null = null;
+// Use a mutable ref object to store context instead of a global variable
+const contextRef = {
+  current: null as ToasterContextValue | null,
+};
 
 // ToasterProvider component
 export const ToasterProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [toasts, setToasts] = useState<Toast[]>([]);
+  // Create a ref to store the context functions
+  const contextValueRef = useRef<ToasterContextValue | null>(null);
 
   const addToast = (message: string, type: ToastType = 'default', duration = 3000) => {
     const id = Math.random().toString(36).substring(2, 9);
@@ -53,15 +57,16 @@ export const ToasterProvider: React.FC<{ children: React.ReactNode }> = ({ child
     setToasts((prevToasts) => prevToasts.filter((toast) => toast.id !== id));
   };
 
-  // Set the context value for the global toast functions
+  // Create the value object
   const value = { toasts, addToast, removeToast };
-  contextValue = value;
-
-  // Update the global context value when the component mounts
+  
+  // Update our ref
   useEffect(() => {
-    contextValue = value;
+    contextValueRef.current = value;
+    // Update the global contextRef only in an effect, not during render
+    contextRef.current = value;
     return () => {
-      contextValue = null;
+      contextRef.current = null;
     };
   }, [value]);
 
@@ -113,29 +118,29 @@ export const Toaster: React.FC = () => {
 // Create a toast object with common methods
 export const toast = {
   success: (message: string) => {
-    if (contextValue) {
-      contextValue.addToast(message, 'success');
+    if (contextRef.current) {
+      contextRef.current.addToast(message, 'success');
     } else {
       console.error('Toast context not available');
     }
   },
   error: (message: string) => {
-    if (contextValue) {
-      contextValue.addToast(message, 'error');
+    if (contextRef.current) {
+      contextRef.current.addToast(message, 'error');
     } else {
       console.error('Toast context not available');
     }
   },
   info: (message: string) => {
-    if (contextValue) {
-      contextValue.addToast(message, 'info');
+    if (contextRef.current) {
+      contextRef.current.addToast(message, 'info');
     } else {
       console.error('Toast context not available');
     }
   },
   warning: (message: string) => {
-    if (contextValue) {
-      contextValue.addToast(message, 'warning');
+    if (contextRef.current) {
+      contextRef.current.addToast(message, 'warning');
     } else {
       console.error('Toast context not available');
     }

@@ -20,7 +20,7 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
     validationErrors: {}
   };
   
-  const { values, errors, isSubmitting, setIsSubmitting, handleChange, handleSubmit, setErrors } = useForm<RegisterFormState>(initialState);
+  const { values, errors, isSubmitting, setIsSubmitting, handleChange, setErrors } = useForm<RegisterFormState>(initialState);
   const { register, error: authError, loading } = useAuth();
   
   const validators = {
@@ -63,8 +63,8 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
     
     if (emailError || passwordError) {
       setErrors({
-        email: emailError,
-        password: passwordError
+        email: emailError || undefined,
+        password: passwordError || undefined
       });
       return;
     }

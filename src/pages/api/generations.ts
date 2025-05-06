@@ -1,7 +1,6 @@
 import type { APIRoute } from 'astro';
 import { z } from 'zod';
 import { AIGenerationService } from '../../lib/services/ai-generation.service';
-import type { Database } from '../../db/database.types';
 
 // Disable prerendering for dynamic response
 export const prerender = false;

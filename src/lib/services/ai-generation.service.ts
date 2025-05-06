@@ -1,10 +1,6 @@
 import crypto from 'crypto';
 import type { SupabaseClient } from '@supabase/supabase-js';
-import type { 
-  GeneratedFlashcardDto, 
-  GenerationResponseDto,
-  GenerationErrorLogDto
-} from "../../types";
+import type { GeneratedFlashcardDto, GenerationResponseDto } from "../../types";
 import { FlashcardSource } from "../../types";
 import type { Database } from "../../db/database.types";
 import { OpenRouterService, type ResponseFormat } from '../openrouter.service';
@@ -89,7 +85,7 @@ export class AIGenerationService {
   private async logError(
     error: unknown,
     userId: string,
-    inputText: string = '',
+    inputText = '',
     model: string = this.defaultModel
   ): Promise<void> {
     try {
@@ -271,20 +267,22 @@ export class AIGenerationService {
         throw error;
       }
 
-      if (!response.structured.flashcards || !Array.isArray(response.structured.flashcards)) {
+      // Cast structured data to expected format
+      const structured = response.structured as { flashcards: GeneratedFlashcardDto[] };
+      if (!structured.flashcards || !Array.isArray(structured.flashcards)) {
         const error = new Error('Invalid or missing flashcards array in AI response');
         error.name = "MISSING_FLASHCARDS";
         throw error;
       }
 
-      if (response.structured.flashcards.length === 0) {
+      if (structured.flashcards.length === 0) {
         const error = new Error('AI generated empty flashcards list');
         error.name = "EMPTY_FLASHCARDS";
         throw error;
       }
 
       // Validate each flashcard
-      for (const card of response.structured.flashcards) {
+      for (const card of structured.flashcards) {
         if (!card.front || !card.back) {
           const error = new Error('Flashcard missing required fields (front or back)');
           error.name = "INVALID_FLASHCARD_FORMAT";
@@ -293,7 +291,7 @@ export class AIGenerationService {
       }
 
       // Transform the structured response into our DTO format
-      const flashcards = response.structured.flashcards.map((card: { front: string; back: string }) => ({
+      const flashcards = structured.flashcards.map((card: { front: string; back: string }) => ({
         front: card.front,
         back: card.back,
         source: FlashcardSource.AI_FULL
