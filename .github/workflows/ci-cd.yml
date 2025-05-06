@@ -26,7 +26,7 @@ jobs:
         run: npm run lint || true  # Continue on lint errors but report them
         
       - name: Run unit and integration tests with coverage
-        run: npm run test -- --coverage --provider=v8
+        run: npm run test -- --coverage
         
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v3
