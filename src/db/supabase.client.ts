@@ -1,16 +1,29 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './database.types';
 
-// Get environment variables from either Cloudflare or Astro
+// Get environment variables from Cloudflare Pages or Astro
 function getEnv(name: string): string | undefined {
-  // Check for Cloudflare environment
-  if (typeof process !== 'undefined' && process.env && process.env[name]) {
-    return process.env[name];
+  // Check for variants of environment variable names
+  const variants = [
+    name,
+    `VITE_${name}`,
+    `PUBLIC_${name}`,
+    `ASTRO_${name}`,
+    `ASTRO_PUBLIC_${name}`
+  ];
+  
+  // Try each variant with both process.env and import.meta.env
+  for (const variant of variants) {
+    // Cloudflare Pages environment
+    if (typeof process !== 'undefined' && process.env && process.env[variant]) {
+      return process.env[variant];
+    }
+    // Astro environment
+    if (import.meta.env && import.meta.env[variant]) {
+      return import.meta.env[variant];
+    }
   }
-  // Check for Astro environment
-  if (import.meta.env && import.meta.env[name]) {
-    return import.meta.env[name];
-  }
+  
   return undefined;
 }
 
