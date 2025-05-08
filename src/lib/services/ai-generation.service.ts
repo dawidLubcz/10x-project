@@ -1,4 +1,3 @@
-import crypto from 'crypto';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { GeneratedFlashcardDto, GenerationResponseDto } from "../../types";
 import { FlashcardSource } from "../../types";
@@ -40,6 +39,8 @@ Guidelines for creating flashcards:
 4. Avoid creating cards that are too complex or contain multiple concepts
 5. Use clear, simple language
 6. Create between 5-10 flashcards depending on the content
+7. If the text is not related to flashcards, respond gently and create one flashcard with the message."
+8. Respond in polish language.
 
 IMPORTANT: You must respond with a valid JSON object containing an array of flashcards. Each flashcard must have 'front' and 'back' properties. Example format:
 
@@ -90,7 +91,7 @@ export class AIGenerationService {
   ): Promise<void> {
     try {
       // Generate hash only if inputText is provided
-      const sourceTextHash = inputText ? this.generateTextHash(inputText) : '';
+      const sourceTextHash = inputText ? await this.generateTextHash(inputText) : '';
       
       // Create error log entry
       const errorLog = {
@@ -150,7 +151,7 @@ export class AIGenerationService {
       }
       
       // Generate hash of input text
-      const sourceTextHash = this.generateTextHash(inputText);
+      const sourceTextHash = await this.generateTextHash(inputText);
       console.log("Generated hash:", sourceTextHash);
       
       // Call AI to generate flashcards
@@ -294,7 +295,7 @@ export class AIGenerationService {
       const flashcards = structured.flashcards.map((card: { front: string; back: string }) => ({
         front: card.front,
         back: card.back,
-        source: FlashcardSource.AI_FULL
+        source: FlashcardSource.AI_FULL as const
       }));
       
       return {
@@ -309,14 +310,20 @@ export class AIGenerationService {
   }
 
   /**
-   * Generates MD5 hash of input text
+   * Generates a hash of input text using Web Crypto API
    * @param text - Text to hash
    * @returns Hash of text
    */
-  private generateTextHash(text: string): string {
-    return crypto
-      .createHash('md5')
-      .update(text)
-      .digest('hex');
+  private async generateTextHash(text: string): Promise<string> {
+    // Use TextEncoder to convert string to Uint8Array
+    const encoder = new TextEncoder();
+    const data = encoder.encode(text);
+    // Use Web Crypto API to create MD5-like hash (using SHA-256 as MD5 isn't available)
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    // Convert buffer to hex string
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    // Return first 32 chars to maintain similar length to MD5
+    return hashHex.substring(0, 32);
   }
 } 
