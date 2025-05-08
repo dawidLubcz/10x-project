@@ -1,6 +1,6 @@
 import { z } from 'zod';
-import fetch, { Response as FetchResponse } from 'node-fetch';
-import https from 'node:https';
+
+type FetchResponse = Response;
 
 // Types and interfaces
 export type MessageRole = 'system' | 'user';
@@ -81,7 +81,6 @@ export class OpenRouterService {
   private model: string;
   private params: Record<string, unknown>;
   private readonly headers: HeadersInit;
-  private readonly agent: https.Agent;
 
   constructor(options: OpenRouterOptions) {
     this.apiKey = options.apiKey;
@@ -94,10 +93,6 @@ export class OpenRouterService {
       'HTTP-Referer': 'https://10x-project.vercel.app/',
       'X-Title': '10xProject'
     };
-    // Create HTTPS agent that accepts all certificates
-    this.agent = new https.Agent({
-      rejectUnauthorized: false
-    });
   }
 
   public setModel(model: string): void {
@@ -230,8 +225,7 @@ export class OpenRouterService {
       const response = await fetch(`${this.baseUrl}/chat/completions`, {
         method: 'POST',
         headers: this.headers,
-        body: JSON.stringify(payload),
-        agent: this.agent
+        body: JSON.stringify(payload)
       });
 
       if (!response.ok) {
