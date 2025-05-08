@@ -31,7 +31,15 @@ const supabaseUrl = getEnv('SUPABASE_URL');
 const supabaseAnonKey = getEnv('SUPABASE_KEY');
 
 if (!supabaseUrl) {
-  throw new Error("Missing Supabase environment variable SUPABASE_URL");
+  var errorMsg = "Missing Supabase environment variable SUPABASE_URL";
+  // dump all os variables
+  errorMsg += "\n";
+  errorMsg += "All environment variables:\n";
+  for (const key in process.env) {
+    errorMsg += `${key}=${process.env[key]}\n`;
+  }
+  console.error(errorMsg);
+  throw new Error(errorMsg);
 }
 
 if (!supabaseAnonKey) {
