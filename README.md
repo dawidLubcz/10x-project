@@ -83,7 +83,7 @@ npm install
 npm run dev
 ```
 
-5. Open your browser and navigate to `http://localhost:4321` (default Astro port)
+5. Open your browser and navigate to `http://localhost:3000` (default Astro port)
 
 ## Available Scripts
 
@@ -103,13 +103,12 @@ npm run dev
 - AI-powered flashcard generation (up to 100 characters of input text)
 - Manual flashcard creation and management
 - User authentication system
-- Integration with existing spaced repetition algorithm
 
 ### Limitations
 - Polish language only for generated flashcards
 - Flashcard format: question and answer only
-- Maximum 100 characters for input text
-- Maximum 1000 characters per flashcard
+- Maximum 1000 characters for input text
+- Maximum 10000 characters per flashcard
 - Data stored in Supabase (user accounts and flashcards)
 
 ## Testing
