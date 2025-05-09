@@ -81,18 +81,12 @@ export class OpenRouterService {
   private model: string;
   private params: Record<string, unknown>;
   private readonly headers: HeadersInit;
-  private readonly useProxy: boolean;
-  private readonly proxyUrl: string;
 
   constructor(options: OpenRouterOptions) {
     this.apiKey = options.apiKey;
     this.baseUrl = options.baseUrl || 'https://openrouter.ai/api/v1';
     this.model = options.defaultModel || 'qwen/qwen3-1.7b:free';
     this.params = options.defaultParams || {};
-    
-    // Enable CORS proxy for edge environments like Cloudflare
-    this.useProxy = true; // Always use proxy in Cloudflare
-    this.proxyUrl = 'https://corsproxy.io/?';
     
     // Get the hostname dynamically if possible
     const hostname = typeof self !== 'undefined' && self.location 
@@ -242,7 +236,7 @@ export class OpenRouterService {
     const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
     
     try {
-      // Prepare fetch options
+      // Prepare fetch options - keep it simple for Cloudflare compatibility
       const fetchOptions: RequestInit = {
         method: 'POST',
         headers: this.headers,
@@ -250,17 +244,12 @@ export class OpenRouterService {
         signal: controller.signal
       };
       
-      // Use CORS proxy if enabled
-      const requestUrl = this.useProxy 
-        ? `${this.proxyUrl}${encodeURIComponent(`${this.baseUrl}/chat/completions`)}`
-        : `${this.baseUrl}/chat/completions`;
-      
-      console.log(`Using ${this.useProxy ? 'CORS proxy' : 'direct'} URL: ${requestUrl}`);
-      const response = await fetch(requestUrl, fetchOptions);
+      console.log('Using standard fetch API for compatibility');
+      const response = await fetch(`${this.baseUrl}/chat/completions`, fetchOptions);
       
       // Clear timeout after request completes
       clearTimeout(timeoutId);
-
+      
       if (!response.ok) {
         // Try to get more error details from response body
         try {
@@ -295,4 +284,4 @@ export class OpenRouterService {
         : 'Unknown network error occurred');
     }
   }
-}
+} 
