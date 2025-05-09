@@ -88,7 +88,7 @@ export class OpenRouterService {
     this.model = options.defaultModel || 'qwen/qwen3-1.7b:free';
     this.params = options.defaultParams || {};
     
-    // Get the hostname from the environment if available
+    // Get the hostname dynamically if possible
     const hostname = typeof self !== 'undefined' && self.location 
       ? self.location.hostname 
       : 'pages.dev';
@@ -98,7 +98,6 @@ export class OpenRouterService {
       'Content-Type': 'application/json',
       'HTTP-Referer': `https://${hostname}/`,
       'X-Title': '10xProject',
-      // Add user agent header for Cloudflare Workers
       'User-Agent': '10xProject/1.0'
     };
   }
@@ -232,52 +231,48 @@ export class OpenRouterService {
     const payload = this.buildPayload(messages, options);
     console.log('Sending request to OpenRouter:', JSON.stringify(payload, null, 2));
     
+    // Add timeout to fetch request
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+    
     try {
-      // Add timeout to fetch request
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+      // Prepare fetch options - keep it simple for Cloudflare compatibility
+      const fetchOptions: RequestInit = {
+        method: 'POST',
+        headers: this.headers,
+        body: JSON.stringify(payload),
+        signal: controller.signal
+      };
       
-      try {
-        const response = await fetch(`${this.baseUrl}/chat/completions`, {
-          method: 'POST',
-          headers: this.headers,
-          body: JSON.stringify(payload),
-          signal: controller.signal
-        });
-        
-        // Clear timeout after request completes
-        clearTimeout(timeoutId);
-        
-        // Log response status and headers for debugging
-        console.log('OpenRouter response status:', response.status);
-        console.log('OpenRouter response status text:', response.statusText);
-        
-        if (!response.ok) {
-          // Try to get more error details from response body
-          try {
-            const errorBody = await response.text();
-            console.error('OpenRouter error response:', errorBody);
-          } catch (bodyError) {
-            console.error('Could not read error response body ', bodyError);
-          }
-          
-          await this.handleError(response);
-        }
-
-        const data = await response.json();
-        return this.parseResponse(data, options?.responseFormat);
-      } catch (fetchError) {
-        // Clean up timeout if fetch throws
-        clearTimeout(timeoutId);
-        
-        // Handle abort errors specifically
-        if (fetchError instanceof DOMException && fetchError.name === 'AbortError') {
-          throw new OpenRouterError('Request timeout after 30 seconds');
+      console.log('Using standard fetch API for compatibility');
+      const response = await fetch(`${this.baseUrl}/chat/completions`, fetchOptions);
+      
+      // Clear timeout after request completes
+      clearTimeout(timeoutId);
+      
+      if (!response.ok) {
+        // Try to get more error details from response body
+        try {
+          const errorBody = await response.text();
+          console.error('OpenRouter error response:', errorBody);
+        } catch (bodyError) {
+          console.error('Could not read error response body ', bodyError);
         }
         
-        throw fetchError;
+        await this.handleError(response);
       }
+
+      const data = await response.json();
+      return this.parseResponse(data, options?.responseFormat);
     } catch (error) {
+      // Clean up timeout if fetch throws
+      clearTimeout(timeoutId);
+      
+      // Handle abort errors specifically
+      if (error instanceof DOMException && error.name === 'AbortError') {
+        throw new OpenRouterError('Request timeout after 30 seconds');
+      }
+      
       console.error('OpenRouter API error details:', error);
       
       if (error instanceof OpenRouterError) {
