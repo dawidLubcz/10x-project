@@ -241,10 +241,19 @@ export class OpenRouterService {
         method: 'POST',
         headers: this.headers,
         body: JSON.stringify(payload),
-        signal: controller.signal
+        signal: controller.signal,
+        // Add cf property for Cloudflare-specific settings
+        cf: {
+          // This instructs Cloudflare to cache the SSL certificates
+          cacheTtl: 1800,
+          // Tell Cloudflare to use its own trusted certificate store
+          cacheEverything: true
+        }
       };
       
       console.log('Using standard fetch API for compatibility');
+      
+      // Use the global fetch API available in Cloudflare
       const response = await fetch(`${this.baseUrl}/chat/completions`, fetchOptions);
       
       // Clear timeout after request completes
