@@ -1,4 +1,5 @@
 # 10xProject
+# A training project completed as part of the 10xDevs course: https://www.10xdevs.pl/
 
 ![Version](https://img.shields.io/badge/version-0.0.1-blue)
 
