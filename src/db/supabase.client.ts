@@ -6,10 +6,10 @@ function getEnv(name: string): string | undefined {
   // Check for variants of environment variable names
   const variants = [
     name,
-    `VITE_${name}`,
-    `PUBLIC_${name}`,
-    `ASTRO_${name}`,
-    `ASTRO_PUBLIC_${name}`
+    //`VITE_${name}`,
+    //`PUBLIC_${name}`,
+    //`ASTRO_${name}`,
+    //`ASTRO_PUBLIC_${name}`
   ];
   
   // Try each variant with both process.env and import.meta.env

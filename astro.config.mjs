@@ -14,6 +14,7 @@ export default defineConfig({
   integrations: [react(), sitemap()],
   server: { port: 3000 },
   vite: {
+    envPrefix: ["SUPABASE_", "PUBLIC_"],
     plugins: [tailwindcss()],
     resolve: {
       alias: {
