@@ -87,11 +87,19 @@ export class OpenRouterService {
     this.baseUrl = options.baseUrl || 'https://openrouter.ai/api/v1';
     this.model = options.defaultModel || 'qwen/qwen3-1.7b:free';
     this.params = options.defaultParams || {};
+    
+    // Get the hostname from the environment if available
+    const hostname = typeof self !== 'undefined' && self.location 
+      ? self.location.hostname 
+      : 'pages.dev';
+    
     this.headers = {
       'Authorization': `Bearer ${this.apiKey}`,
       'Content-Type': 'application/json',
-      'HTTP-Referer': 'https://10x-project.vercel.app/',
-      'X-Title': '10xProject'
+      'HTTP-Referer': `https://${hostname}/`,
+      'X-Title': '10xProject',
+      // Add user agent header for Cloudflare Workers
+      'User-Agent': '10xProject/1.0'
     };
   }
 
@@ -191,6 +199,8 @@ export class OpenRouterService {
     switch (status) {
       case 401:
         throw new AuthenticationError();
+      case 403:
+        throw new OpenRouterError('Access forbidden - API key may be invalid or missing required permissions');
       case 429:
         throw new RateLimitError(
           retryAfter
@@ -203,11 +213,12 @@ export class OpenRouterService {
       case 501:
       case 502:
       case 503:
+        throw new ServerError(`Server error occurred with status ${status} - The service may be temporarily unavailable`);
       case 504:
-        throw new ServerError('Server error occurred');
+        throw new ServerError('Gateway timeout - The request took too long to process');
     }
 
-    throw new OpenRouterError('Unknown error occurred');
+    throw new OpenRouterError(`Unknown error occurred with status ${status}`);
   }
 
   public async sendChat(
@@ -222,24 +233,60 @@ export class OpenRouterService {
     console.log('Sending request to OpenRouter:', JSON.stringify(payload, null, 2));
     
     try {
-      const response = await fetch(`${this.baseUrl}/chat/completions`, {
-        method: 'POST',
-        headers: this.headers,
-        body: JSON.stringify(payload)
-      });
+      // Add timeout to fetch request
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+      
+      try {
+        const response = await fetch(`${this.baseUrl}/chat/completions`, {
+          method: 'POST',
+          headers: this.headers,
+          body: JSON.stringify(payload),
+          signal: controller.signal
+        });
+        
+        // Clear timeout after request completes
+        clearTimeout(timeoutId);
+        
+        // Log response status and headers for debugging
+        console.log('OpenRouter response status:', response.status);
+        console.log('OpenRouter response status text:', response.statusText);
+        
+        if (!response.ok) {
+          // Try to get more error details from response body
+          try {
+            const errorBody = await response.text();
+            console.error('OpenRouter error response:', errorBody);
+          } catch (bodyError) {
+            console.error('Could not read error response body ', bodyError);
+          }
+          
+          await this.handleError(response);
+        }
 
-      if (!response.ok) {
-        await this.handleError(response);
+        const data = await response.json();
+        return this.parseResponse(data, options?.responseFormat);
+      } catch (fetchError) {
+        // Clean up timeout if fetch throws
+        clearTimeout(timeoutId);
+        
+        // Handle abort errors specifically
+        if (fetchError instanceof DOMException && fetchError.name === 'AbortError') {
+          throw new OpenRouterError('Request timeout after 30 seconds');
+        }
+        
+        throw fetchError;
       }
-
-      const data = await response.json();
-      return this.parseResponse(data, options?.responseFormat);
     } catch (error) {
-      console.error('OpenRouter API error:', error);
+      console.error('OpenRouter API error details:', error);
+      
       if (error instanceof OpenRouterError) {
         throw error;
       }
-      throw new OpenRouterError(error instanceof Error ? error.message : 'Network error occurred');
+      
+      throw new OpenRouterError(error instanceof Error 
+        ? `Network error: ${error.name} - ${error.message}` 
+        : 'Unknown network error occurred');
     }
   }
 } 
