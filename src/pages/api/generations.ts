@@ -71,7 +71,6 @@ export const POST: APIRoute = async ({ request, locals }) => {
     const apiKey = import.meta.env.OPENROUTER_API_KEY;
     if (!apiKey) {
       // Log this error to the database
-      let errorLog = null;
       try {
         await supabase
           .from("generation_error_logs")
@@ -85,14 +84,13 @@ export const POST: APIRoute = async ({ request, locals }) => {
           });
       } catch (logError) {
         console.error("Failed to log API key error:", logError);
-        errorLog = logError;
       }
 
       return new Response(
         JSON.stringify({
           error: {
             code: "SERVICE_UNAVAILABLE",
-            message: "Usługa generatora jest obecnie niedostępna. Prosimy spróbować później. Msg: " + errorLog
+            message: "Usługa generatora jest obecnie niedostępna. Prosimy spróbować później."
           }
         }),
         {
@@ -199,7 +197,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
       // Determine the appropriate error code and message based on the error
       let statusCode = 500;
       let errorCode = "GENERATION_FAILED";
-      let errorMessage = "Wystąpił błąd podczas generowania fiszek. Msg: " + generationError;
+      let errorMessage = "Wystąpił błąd podczas generowania fiszek.";
       
       // Handle specific error cases
       if (generationError instanceof Error) {
@@ -212,7 +210,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
         } else if (message.includes("OpenRouter API error")) {
           statusCode = 503;
           errorCode = "AI_SERVICE_ERROR";
-          errorMessage = "Serwis AI jest chwilowo niedostępny. Prosimy spróbować później. Msg: " + generationError;
+          errorMessage = "Serwis AI jest chwilowo niedostępny. Prosimy spróbować później.";
         }
       }
       
